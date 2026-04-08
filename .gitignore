@@ -1,0 +1,25 @@
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Build and dependencies
+build/
+bin/
+out/
+node_modules/
+dist/
+.gradle/
+.angular/
+
+# Environment and secrets
+.env
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+shop.sql
+mysql_data/
