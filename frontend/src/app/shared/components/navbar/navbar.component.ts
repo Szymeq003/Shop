@@ -9,12 +9,13 @@ import { AuthService } from '../../../core/services/auth.service';
   template: `
     <nav class="navbar">
       <div class="container navbar-inner">
-        <a routerLink="/" class="brand">🛍️ Sklep</a>
+        <a routerLink="/" class="brand">
+          <img src="favicon.ico" alt="TechPulse Logo" class="logo-img">
+          TechPulse
+        </a>
         @if (auth.isLoggedIn()) {
           <div class="nav-links">
-            <a routerLink="/account/profile" routerLinkActive="active">Moje konto</a>
-            <a routerLink="/account/addresses" routerLinkActive="active">Adresy</a>
-            <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
+            <a routerLink="/account/orders" routerLinkActive="active">Moje konto</a>
             <button class="btn btn-secondary btn-sm" (click)="auth.logout()">Wyloguj</button>
           </div>
         } @else {
@@ -36,7 +37,8 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex; align-items: center;
     }
     .navbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-    .brand { font-size: 20px; font-weight: 700; color: var(--text); margin-right: auto; }
+    .brand { font-size: 20px; font-weight: 700; color: var(--text); margin-right: auto; display: flex; align-items: center; gap: 10px; }
+    .logo-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
     .nav-links { display: flex; align-items: center; gap: 12px; }
     .nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
     .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--card-hover); }

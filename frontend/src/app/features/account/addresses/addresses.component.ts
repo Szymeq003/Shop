@@ -2,19 +2,24 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddressService, Address, AddressRequest } from '../../../core/services/address.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   template: `
     <div class="page container">
       <div class="account-layout">
         <aside class="account-nav">
-          <h3 style="margin-bottom: 20px; font-size: 16px; px: 14px;">Nawigacja</h3>
-          <a href="/account/profile">Ustawienia konta</a>
-          <a class="active">Adresy dostawy</a>
-          <a href="/account/orders">Historia zamówień</a>
+          <h3 style="margin-bottom: 20px; font-size: 16px; padding: 0 14px;">Cześć {{ profileData().name.split(' ')[0] }}</h3>
+          <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
+          <a routerLink="/account/returns" routerLinkActive="active">Zwroty</a>
+          <a routerLink="/account/wishlist" routerLinkActive="active">Obserwowane</a>
+          <a routerLink="/account/reviews" routerLinkActive="active">Opinie</a>
+          <a routerLink="/account/addresses" routerLinkActive="active">Dane dostawy</a>
+          <a routerLink="/account/profile" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Ustawienia konta</a>
         </aside>
 
         <main>
@@ -130,9 +135,14 @@ import { AddressService, Address, AddressRequest } from '../../../core/services/
 })
 export class AddressesComponent implements OnInit {
   private addressService = inject(AddressService);
+  private authService = inject(AuthService);
 
   addresses = signal<Address[]>([]);
   isLoading = signal(true);
+  profileData = signal({
+    name: this.authService.currentUser()?.name || '',
+    email: this.authService.currentUser()?.email || ''
+  });
   showModal = signal(false);
   isEditing = signal(false);
   isSaving = signal(false);

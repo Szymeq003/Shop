@@ -52,7 +52,7 @@ export const routes: Routes = [
         path: 'orders/:id',
         loadComponent: () => import('./features/account/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
       },
-      { path: '', redirectTo: 'profile', pathMatch: 'full' }
+      { path: '', redirectTo: 'orders', pathMatch: 'full' }
     ]
   },
 

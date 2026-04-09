@@ -1,21 +1,25 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   template: `
     <div class="page container">
       <div class="account-layout">
         <aside class="account-nav">
-          <h3 style="margin-bottom: 20px; font-size: 16px; padding: 0 14px;">Nawigacja</h3>
-          <a class="active">Ustawienia konta</a>
-          <a href="/account/addresses">Adresy dostawy</a>
-          <a href="/account/orders">Historia zamówień</a>
+          <h3 style="margin-bottom: 20px; font-size: 16px; padding: 0 14px;">Cześć {{ profileData().name.split(' ')[0] }}</h3>
+          <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
+          <a routerLink="/account/returns" routerLinkActive="active">Zwroty</a>
+          <a routerLink="/account/wishlist" routerLinkActive="active">Obserwowane</a>
+          <a routerLink="/account/reviews" routerLinkActive="active">Opinie</a>
+          <a routerLink="/account/addresses" routerLinkActive="active">Dane dostawy</a>
+          <a routerLink="/account/profile" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Ustawienia konta</a>
         </aside>
 
         <main>
@@ -125,42 +129,102 @@ import { AuthService } from '../../../core/services/auth.service';
             }
 
             <form (ngSubmit)="changePassword()" #passwordForm="ngForm">
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom: 20px;">
                 <label for="currentPassword">Aktualne hasło</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  name="currentPassword"
-                  [(ngModel)]="passwordData.currentPassword"
-                  required
-                  placeholder="••••••••"
-                >
+                <div class="password-wrapper">
+                  <input
+                    [type]="showCurrentPassword() ? 'text' : 'password'"
+                    id="currentPassword"
+                    name="currentPassword"
+                    [(ngModel)]="passwordData.currentPassword"
+                    required
+                    placeholder="••••••••"
+                  >
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="showCurrentPassword.set(!showCurrentPassword())"
+                    [attr.aria-label]="showCurrentPassword() ? 'Ukryj hasło' : 'Pokaż hasło'"
+                  >
+                    @if (showCurrentPassword()) {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    }
+                  </button>
+                </div>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom: 20px;">
                 <label for="newPassword">Nowe hasło</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="newPassword"
-                  [(ngModel)]="passwordData.newPassword"
-                  required
-                  minlength="8"
-                  placeholder="Min. 8 znaków"
-                  #newPwd="ngModel"
-                >
+                <div class="password-wrapper">
+                  <input
+                    [type]="showNewPassword() ? 'text' : 'password'"
+                    id="newPassword"
+                    name="newPassword"
+                    [(ngModel)]="passwordData.newPassword"
+                    required
+                    minlength="8"
+                    placeholder="Min. 8 znaków"
+                    #newPwd="ngModel"
+                  >
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="showNewPassword.set(!showNewPassword())"
+                    [attr.aria-label]="showNewPassword() ? 'Ukryj hasło' : 'Pokaż hasło'"
+                  >
+                    @if (showNewPassword()) {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    }
+                  </button>
+                </div>
               </div>
 
               <div class="form-group">
                 <label for="confirmNewPassword">Powtórz nowe hasło</label>
-                <input
-                  type="password"
-                  id="confirmNewPassword"
-                  name="confirmNewPassword"
-                  [(ngModel)]="confirmNewPassword"
-                  required
-                  placeholder="Powtórz nowe hasło"
-                >
+                <div class="password-wrapper">
+                  <input
+                    [type]="showConfirmNewPassword() ? 'text' : 'password'"
+                    id="confirmNewPassword"
+                    name="confirmNewPassword"
+                    [(ngModel)]="confirmNewPassword"
+                    required
+                    placeholder="Powtórz nowe hasło"
+                  >
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="showConfirmNewPassword.set(!showConfirmNewPassword())"
+                    [attr.aria-label]="showConfirmNewPassword() ? 'Ukryj hasło' : 'Pokaż hasło'"
+                  >
+                    @if (showConfirmNewPassword()) {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    }
+                  </button>
+                </div>
                 @if (confirmNewPassword && confirmNewPassword !== passwordData.newPassword) {
                   <span style="color: var(--error); font-size: 12px; margin-top: 4px;">Hasła nie są identyczne</span>
                 }
@@ -212,7 +276,6 @@ export class ProfileComponent implements OnInit {
     phone: ''
   });
 
-  // Dane tymczasowe do formularza edycji
   editData = {
     name: '',
     phone: ''
@@ -227,12 +290,16 @@ export class ProfileComponent implements OnInit {
   isEditMode = signal(false);
   isUpdatingProfile = signal(false);
   isChangingPassword = signal(false);
-  
+
   profileError = signal<string | null>(null);
   profileSuccess = signal<string | null>(null);
-  
+
   passwordError = signal<string | null>(null);
   passwordSuccess = signal<string | null>(null);
+
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmNewPassword = signal(false);
 
   ngOnInit() {
     this.loadProfile();
@@ -264,7 +331,7 @@ export class ProfileComponent implements OnInit {
     this.profileError.set(null);
     this.profileSuccess.set(null);
 
-    this.userService.updateProfile({ 
+    this.userService.updateProfile({
       name: this.editData.name,
       phone: this.editData.phone
     }).subscribe({
@@ -272,7 +339,7 @@ export class ProfileComponent implements OnInit {
         this.profileSuccess.set('Dane zostały zaktualizowane.');
         this.isUpdatingProfile.set(false);
         this.isEditMode.set(false);
-        
+
         const updatedData = {
           name: res.name,
           email: res.email,
@@ -280,7 +347,7 @@ export class ProfileComponent implements OnInit {
         };
         this.profileData.set(updatedData);
         this.editData = { name: updatedData.name, phone: updatedData.phone };
-        
+
         const currentUser = this.authService.currentUser();
         if (currentUser) {
           this.authService.currentUser.set({ ...currentUser, name: res.name });
