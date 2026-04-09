@@ -232,6 +232,23 @@ a:hover { color: var(--primary); }
   position: sticky;
   top: 90px;
 }
+@media (max-width: 768px) {
+  .account-nav {
+    position: static;
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 12px;
+    margin-bottom: 24px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Ukrycie scrollbara na Firefox */
+  }
+  .account-nav::-webkit-scrollbar { display: none; } /* Ukrycie scrollbara na Chrome/Safari */
+  
+  .account-nav a { margin-bottom: 0; flex: 0 0 auto; }
+}
+
 .account-nav a {
   display: flex;
   align-items: center;
@@ -316,3 +333,18 @@ tr:hover td { background: var(--card-hover); }
 
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ===== Responsive Overrides ===== */
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+  .page { padding: 24px 0; }
+  .card { padding: 20px; }
+  .auth-card { padding: 32px 24px; }
+  .auth-logo h1 { font-size: 24px; }
+  .page-title { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .auth-card { border-radius: 0; border-left: none; border-right: none; }
+  .btn { width: 100%; }
+}

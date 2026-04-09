@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-logo">
-          <h1>Sklep</h1>
+          <h1>Rejestracja</h1>
           <p>Utwórz konto, aby zacząć zakupy.</p>
         </div>
 
