@@ -1,42 +1,31 @@
 package org.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "order_items")
+@Table(name = "product_attribute_values")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class ProductAttributeValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Column(name = "variant_id")
-    private Long variantId;
+    @JoinColumn(name = "attribute_id", nullable = false)
+    private ProductAttribute attribute;
 
     @Column(nullable = false)
-    private Integer quantity;
-
-    @Column(nullable = false)
-    private BigDecimal price;
+    private String value;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

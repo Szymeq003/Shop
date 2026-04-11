@@ -22,6 +22,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <div class="nav-links-wrapper" [class.open]="isMenuOpen()">
           <div class="nav-links">
+            <a routerLink="/products" routerLinkActive="active" (click)="isMenuOpen.set(false)">Produkty</a>
             @if (auth.isLoggedIn()) {
               <a routerLink="/account/orders" routerLinkActive="active" (click)="isMenuOpen.set(false)">Moje konto</a>
               <button class="btn btn-secondary btn-sm" (click)="auth.logout(); isMenuOpen.set(false)">Wyloguj</button>

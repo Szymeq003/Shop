@@ -38,7 +38,7 @@ public class OrderService {
     private OrderResponse toResponse(Order order) {
         List<OrderResponse.OrderItemResponse> items = order.getItems() == null ? List.of() :
                 order.getItems().stream().map(item -> new OrderResponse.OrderItemResponse(
-                        item.getProductId(),
+                        item.getProduct().getId(),
                         item.getVariantId(),
                         item.getQuantity(),
                         item.getPrice()
