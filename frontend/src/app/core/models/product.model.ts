@@ -1,4 +1,5 @@
-import { Review } from './review.model';
+import type { ReviewDTO } from './review.model';
+export type { ReviewDTO };
 
 export interface Product {
   id: number;
@@ -16,7 +17,7 @@ export interface ProductDetail extends Product {
   description: string;
   imageUrls: string[];
   variants: ProductVariant[];
-  reviews: Review[];
+  reviews: ReviewDTO[];
   attributes: { [key: string]: string[] };
 }
 

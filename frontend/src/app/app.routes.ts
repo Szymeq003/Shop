@@ -79,6 +79,14 @@ export const routes: Routes = [
         path: 'orders/:id',
         loadComponent: () => import('./features/account/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
       },
+      {
+        path: 'reviews',
+        loadComponent: () => import('./features/account/reviews/reviews.component').then(m => m.ReviewsComponent)
+      },
+      {
+        path: 'wishlist',
+        loadComponent: () => import('./features/account/wishlist/wishlist.component').then(m => m.WishlistComponent)
+      },
       { path: '', redirectTo: 'orders', pathMatch: 'full' }
     ]
   },

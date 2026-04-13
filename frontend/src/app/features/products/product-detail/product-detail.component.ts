@@ -7,11 +7,15 @@ import { ProductDetail, ProductVariant } from '../../../core/models/product.mode
 import { CartService } from '../../../core/services/cart.service';
 import { CartItem } from '../../../core/models/cart.model';
 import { UiService } from '../../../core/services/ui.service';
+import { ReviewService } from '../../../core/services/review.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { StarRatingComponent } from '../../../shared/components/star-rating/star-rating.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe, FormsModule],
+  imports: [CommonModule, RouterModule, CurrencyPipe, FormsModule, StarRatingComponent],
   template: `
     <div class="product-detail-page container" *ngIf="product()">
       <nav class="breadcrumb">
@@ -25,7 +29,9 @@ import { UiService } from '../../../core/services/ui.service';
       <div class="main-layout">
         <div class="gallery-section">
           <div class="main-image">
-            <img [src]="selectedImage() || product()?.mainImageUrl" [alt]="product()?.name">
+            <img *ngIf="selectedImage() || product()?.mainImageUrl || (product()?.imageUrls?.length ? product()!.imageUrls[0] : null)" 
+                 [src]="selectedImage() || product()?.mainImageUrl || product()!.imageUrls[0]" 
+                 [alt]="product()?.name">
           </div>
           <div class="thumbnails" *ngIf="product()?.imageUrls && product()!.imageUrls.length > 1">
             <div 
@@ -41,18 +47,13 @@ import { UiService } from '../../../core/services/ui.service';
 
         <div class="info-section">
           <h1 class="product-name">{{ product()?.name }}</h1>
-          
-          <div class="rating-summary">
-            <span class="stars">★ {{ product()?.averageRating | number:'1.1-1' }}</span>
-            <span class="count">({{ product()?.reviewCount }} opinii)</span>
-          </div>
 
           <div class="variants-section" *ngIf="product()?.variants?.length">
-            <h3>Wybierz opcję:</h3>
+            <h3>Wybierz wariant</h3>
             <div class="variants-grid">
               <div 
-                *ngFor="let variant of product()?.variants" 
-                class="variant-card"
+                class="variant-card" 
+                *ngFor="let variant of product()?.variants"
                 [class.active]="selectedVariant()?.id === variant.id"
                 (click)="selectedVariant.set(variant)"
               >
@@ -69,8 +70,10 @@ import { UiService } from '../../../core/services/ui.service';
           </div>
 
           <div class="price-box">
-            <div class="price">
-              {{ (selectedVariant()?.price || product()?.price) | currency:'PLN':'symbol':'1.2-2' }}
+            <div class="price-row">
+              <div class="price">
+                {{ (selectedVariant()?.price || product()?.price) | currency:'PLN':'symbol':'1.2-2' }}
+              </div>
             </div>
             <div class="availability" [class.out-of-stock]="isOutOfStock()">
               <span class="dot"></span> 
@@ -92,6 +95,16 @@ import { UiService } from '../../../core/services/ui.service';
             >
               Dodaj do koszyka
             </button>
+            <button 
+              class="wishlist-btn" 
+              [class.in-wishlist]="isInWishlist()" 
+              (click)="toggleWishlist()"
+              [title]="isInWishlist() ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="heart-icon">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
           </div>
 
           <div class="short-description">
@@ -103,17 +116,65 @@ import { UiService } from '../../../core/services/ui.service';
 
       <div class="detailed-info">
         <div class="tabs">
-          <button class="tab-btn active">Specyfikacja</button>
-          <button class="tab-btn">Opinie</button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab() === 'specs'"
+            (click)="activeTab.set('specs')"
+          >Specyfikacja</button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab() === 'reviews'"
+            (click)="activeTab.set('reviews')"
+          >Opinie ({{ product()?.reviewCount }})</button>
         </div>
 
         <div class="tab-content">
-          <table class="specs-table">
+          <table class="specs-table" *ngIf="activeTab() === 'specs'">
             <tr *ngFor="let attr of getAttributes()">
               <td class="label">{{ attr.key }}</td>
               <td class="value">{{ attr.values.join(', ') }}</td>
             </tr>
           </table>
+
+          <div class="reviews-content" *ngIf="activeTab() === 'reviews'">
+            <div class="add-review-section" *ngIf="auth.isLoggedIn()">
+              <h3>Dodaj swoją opinię</h3>
+              <div class="review-form">
+                <div class="rating-picker">
+                  <span>Twoja ocena:</span>
+                  <app-star-rating [rating]="newReviewRating" (ratingChange)="newReviewRating = $event"></app-star-rating>
+                </div>
+                <div class="textarea-wrapper">
+                  <textarea 
+                    [(ngModel)]="newReviewComment" 
+                    placeholder="Napisz co sądzisz o produkcie..."
+                    rows="4"
+                  ></textarea>
+                </div>
+                <button 
+                  class="btn btn-primary" 
+                  (click)="submitReview()"
+                  [disabled]="isSubmittingReview() || !newReviewRating"
+                >
+                  Opublikuj opinię
+                </button>
+              </div>
+            </div>
+
+            <div class="reviews-list">
+              <div class="review-item" *ngFor="let review of product()?.reviews">
+                <div class="review-header">
+                  <span class="user-name">{{ review.userName }}</span>
+                  <app-star-rating [rating]="review.rating" [readonly]="true"></app-star-rating>
+                  <span class="date">{{ review.createdAt | date:'dd.MM.yyyy' }}</span>
+                </div>
+                <p class="comment">{{ review.comment }}</p>
+              </div>
+              <div class="empty-reviews" *ngIf="!product()?.reviews?.length">
+                <p>Ten produkt nie posiada jeszcze żadnych opinii. Bądź pierwszy!</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -175,7 +236,18 @@ import { UiService } from '../../../core/services/ui.service';
       border: 1px solid var(--border);
       padding: 24px; border-radius: 20px; margin-bottom: 32px;
     }
-    .price { font-size: 36px; font-weight: 700; color: var(--primary-light); margin-bottom: 8px; }
+    .price-row { display: flex; align-items: flex-start; margin-bottom: 8px; }
+    .price { font-size: 36px; font-weight: 700; color: var(--primary-light); }
+    .wishlist-btn {
+      background: #fff; border: 2px solid #e2e8f0; width: 56px; height: 56px;
+      border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: #94a3b8;
+      flex-shrink: 0;
+    }
+    .wishlist-btn:hover { border-color: #fca5a5; color: #ef4444; background: #fff1f2; transform: scale(1.05); }
+    .heart-icon { width: 24px; height: 24px; transition: all 0.3s; }
+    .wishlist-btn.in-wishlist { background: #fff1f2; border-color: #ef4444; color: #ef4444; }
+    .wishlist-btn.in-wishlist .heart-icon { fill: currentColor; }
     .availability { color: var(--success); font-size: 14px; display: flex; align-items: center; gap: 8px; }
     .availability .dot { width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
 
@@ -226,6 +298,75 @@ import { UiService } from '../../../core/services/ui.service';
     .specs-table .label { color: var(--text-muted); width: 250px; font-weight: 500; }
     .specs-table .value { color: var(--text); font-weight: 500; }
 
+    .reviews-content { animation: fadeIn 0.3s ease; }
+    .add-review-section {
+      background: var(--card);
+      padding: 32px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    }
+    .add-review-section h3 {
+      margin-bottom: 24px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .review-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .rating-picker {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: rgba(0,0,0,0.02);
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .textarea-wrapper {
+      position: relative;
+    }
+    .review-form textarea {
+      width: 100%;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+      font-size: 15px;
+      color: var(--text);
+      transition: all 0.3s;
+    }
+    .review-form textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+    }
+    .review-form textarea::placeholder {
+      color: #94a3b8;
+    }
+    .review-form .btn-primary {
+      align-self: flex-end;
+      padding: 14px 32px;
+      font-weight: 600;
+      border-radius: 12px;
+    }
+    
+    .reviews-list { display: flex; flex-direction: column; gap: 24px; }
+    .review-item { padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .review-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .user-name { font-weight: 700; }
+    .date { color: var(--text-muted); font-size: 14px; margin-left: auto; }
+    .comment { line-height: 1.6; color: var(--text); }
+    .empty-reviews { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     @media (max-width: 992px) {
       .main-layout { grid-template-columns: 1fr; gap: 40px; }
     }
@@ -235,26 +376,102 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
+  private reviewService = inject(ReviewService);
+  private wishlistService = inject(WishlistService);
+  public auth = inject(AuthService);
   private ui = inject(UiService);
 
   product = signal<ProductDetail | null>(null);
   isLoading = signal(true);
   selectedImage = signal<string | null>(null);
   selectedVariant = signal<ProductVariant | null>(null);
+  activeTab = signal<'specs' | 'reviews'>('specs');
+  isInWishlist = signal(false);
   quantity = 1;
+
+  // Review form state
+  newReviewRating = 0;
+  newReviewComment = '';
+  isSubmittingReview = signal(false);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.productService.getProductById(+id).subscribe(p => {
-        this.product.set(p);
-        this.isLoading.set(false);
-        // Auto-select first variant if available
-        if (p.variants && p.variants.length > 0) {
-          this.selectedVariant.set(p.variants[0]);
-        }
+      this.loadProduct(+id);
+      this.checkWishlist(+id);
+    }
+  }
+
+  loadProduct(id: number) {
+    this.productService.getProductById(id).subscribe(p => {
+      this.product.set(p);
+      this.isLoading.set(false);
+
+      if (p.imageUrls && p.imageUrls.length > 0) {
+        this.selectedImage.set(p.imageUrls[0]);
+      } else if (p.mainImageUrl) {
+        this.selectedImage.set(p.mainImageUrl);
+      }
+
+      if (p.variants && p.variants.length > 0 && !this.selectedVariant()) {
+        this.selectedVariant.set(p.variants[0]);
+      }
+    });
+  }
+
+  checkWishlist(id: number) {
+    if (this.auth.isLoggedIn()) {
+      this.wishlistService.getWishlist().subscribe(list => {
+        this.isInWishlist.set(list.some(item => item.id === id));
       });
     }
+  }
+
+  toggleWishlist() {
+    if (!this.auth.isLoggedIn()) {
+      this.ui.showToast('Zaloguj się, aby dodać do ulubionych', 'error');
+      return;
+    }
+
+    const productId = this.product()?.id;
+    if (!productId) return;
+
+    if (this.isInWishlist()) {
+      this.wishlistService.removeFromWishlist(productId).subscribe(() => {
+        this.isInWishlist.set(false);
+        this.ui.showToast('Usunięto z ulubionych');
+      });
+    } else {
+      this.wishlistService.addToWishlist(productId).subscribe(() => {
+        this.isInWishlist.set(true);
+        this.ui.showToast('Dodano do ulubionych!');
+      });
+    }
+  }
+
+  submitReview() {
+    if (!this.newReviewRating) return;
+    
+    const productId = this.product()?.id;
+    if (!productId) return;
+
+    this.isSubmittingReview.set(true);
+    this.reviewService.addReview(productId, {
+      rating: this.newReviewRating,
+      comment: this.newReviewComment
+    }).subscribe({
+      next: () => {
+        this.ui.showToast('Opinia została dodana!');
+        this.loadProduct(productId); // Reload to show new review
+        this.newReviewRating = 0;
+        this.newReviewComment = '';
+        this.isSubmittingReview.set(false);
+      },
+      error: (err) => {
+        this.ui.showToast(err.error?.message || 'Wystąpił błąd podczas dodawania opinii', 'error');
+        this.isSubmittingReview.set(false);
+      }
+    });
   }
 
   getAttributes() {

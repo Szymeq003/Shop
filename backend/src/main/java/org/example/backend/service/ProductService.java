@@ -3,6 +3,7 @@ package org.example.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.product.*;
 import org.example.backend.entity.*;
+import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.CategoryRepository;
 import org.example.backend.repository.ProductRepository;
 import org.example.backend.repository.specification.ProductSpecification;
@@ -45,7 +46,7 @@ public class ProductService {
 
     public ProductDetailDTO getProductById(Long id) {
         Product product = productRepository.findByIdAndStatus(id, Product.Status.AKTYWNY)
-                .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony lub jest niedostępny"));
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt nie znaleziony lub jest niedostępny"));
         return convertToDetailDTO(product);
     }
 
@@ -84,6 +85,9 @@ public class ProductService {
             })
         );
 
+        List<String> imageUrls = product.getImages().stream()
+                .map(ProductImage::getImagePath).collect(Collectors.toList());
+        
         return ProductDetailDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -91,7 +95,8 @@ public class ProductService {
                 .price(product.getPrice())
                 .categoryId(product.getCategory().getId())
                 .categoryName(product.getCategory().getName())
-                .imageUrls(product.getImages().stream().map(ProductImage::getImagePath).collect(Collectors.toList()))
+                .mainImageUrl(imageUrls.isEmpty() ? null : imageUrls.get(0))
+                .imageUrls(imageUrls)
                 .variants(product.getVariants().stream().map(this::convertToVariantDTO).collect(Collectors.toList()))
                 .reviews(product.getReviews().stream().map(this::convertToReviewDTO).collect(Collectors.toList()))
                 .attributes(attributesMap)

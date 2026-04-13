@@ -17,11 +17,17 @@ public class DataLoader implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductAttributeRepository productAttributeRepository;
+    private final WishlistRepository wishlistRepository;
+    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
 
     @Override
     @Transactional
     public void run(String... args) {
-        // Cleanup existing data
+        // Cleanup dependent tables first to avoid FK constraint violations
+        wishlistRepository.deleteAll();
+        cartItemRepository.deleteAll();
+        cartRepository.deleteAll();
         productRepository.deleteAll();
         productAttributeRepository.deleteAll();
 

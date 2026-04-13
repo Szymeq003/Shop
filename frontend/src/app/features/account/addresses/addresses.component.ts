@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddressService, Address, AddressRequest } from '../../../core/services/address.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { UiService } from '../../../core/services/ui.service';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -136,6 +137,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class AddressesComponent implements OnInit {
   private addressService = inject(AddressService);
   private authService = inject(AuthService);
+  private ui = inject(UiService);
 
   addresses = signal<Address[]>([]);
   isLoading = signal(true);
@@ -205,14 +207,16 @@ export class AddressesComponent implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.showModal.set(false);
+        this.ui.showToast(this.isEditing() ? 'Adres został pomyślnie zaktualizowany' : 'Nowy adres został pomyślnie dodany');
         this.loadAddresses();
       },
       error: () => this.isSaving.set(false)
     });
   }
 
-  deleteAddress(id: number) {
-    if (confirm('Czy na pewno chcesz usunąć ten adres?')) {
+  async deleteAddress(id: number) {
+    const confirmed = await this.ui.confirm('Czy na pewno chcesz usunąć ten adres?');
+    if (confirmed) {
       this.addressService.deleteAddress(id).subscribe(() => {
         this.addresses.update(prev => prev.filter(a => a.id !== id));
       });
