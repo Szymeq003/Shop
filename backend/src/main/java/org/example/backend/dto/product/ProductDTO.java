@@ -19,6 +19,7 @@ public class ProductDTO {
     private String categoryName;
     private Long categoryId;
     private String mainImageUrl;
+    private Long defaultVariantId;
     private Double averageRating;
     private Integer reviewCount;
 }

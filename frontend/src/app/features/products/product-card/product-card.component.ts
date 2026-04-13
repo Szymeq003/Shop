@@ -1,7 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product } from '../../../core/models/product.model';
+import { CartService } from '../../../core/services/cart.service';
+import { CartItem } from '../../../core/models/cart.model';
+import { UiService } from '../../../core/services/ui.service';
 
 @Component({
   selector: 'app-product-card',
@@ -148,10 +151,32 @@ import { Product } from '../../../core/models/product.model';
   `]
 })
 export class ProductCardComponent {
+  private cartService = inject(CartService);
+  private ui = inject(UiService);
   @Input() product!: Product;
 
   addToCart(event: Event) {
     event.stopPropagation();
-    // Logic later
+    
+    if (!this.product.defaultVariantId) {
+      this.ui.showToast('Ten produkt nie może zostać dodany do koszyka z poziomu listy.', 'error');
+      return;
+    }
+
+    const cartItem: CartItem = {
+      productId: this.product.id,
+      variantId: this.product.defaultVariantId,
+      productName: this.product.name,
+      sku: '', // Not critical for list add
+      mainImageUrl: this.product.mainImageUrl,
+      price: this.product.price,
+      quantity: 1,
+      subtotal: this.product.price,
+      attributes: {} // Not picked yet
+    };
+
+    this.cartService.addToCart(cartItem).subscribe(() => {
+      this.ui.showToast('Dodano do koszyka!');
+    });
   }
 }

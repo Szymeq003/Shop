@@ -7,6 +7,7 @@ export interface Product {
   categoryName: string;
   categoryId: number;
   mainImageUrl: string;
+  defaultVariantId: number;
   averageRating: number;
   reviewCount: number;
 }

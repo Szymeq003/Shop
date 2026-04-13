@@ -63,6 +63,7 @@ public class ProductService {
                 .categoryId(product.getCategory().getId())
                 .categoryName(product.getCategory().getName())
                 .mainImageUrl(!product.getImages().isEmpty() ? product.getImages().get(0).getImagePath() : null)
+                .defaultVariantId(!product.getVariants().isEmpty() ? product.getVariants().get(0).getId() : null)
                 .averageRating(product.getReviews().isEmpty() ? 0.0 : 
                     product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0))
                 .reviewCount(product.getReviews().size())

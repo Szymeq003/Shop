@@ -3,7 +3,10 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
-import { ProductDetail } from '../../../core/models/product.model';
+import { ProductDetail, ProductVariant } from '../../../core/models/product.model';
+import { CartService } from '../../../core/services/cart.service';
+import { CartItem } from '../../../core/models/cart.model';
+import { UiService } from '../../../core/services/ui.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -44,10 +47,35 @@ import { ProductDetail } from '../../../core/models/product.model';
             <span class="count">({{ product()?.reviewCount }} opinii)</span>
           </div>
 
+          <div class="variants-section" *ngIf="product()?.variants?.length">
+            <h3>Wybierz opcję:</h3>
+            <div class="variants-grid">
+              <div 
+                *ngFor="let variant of product()?.variants" 
+                class="variant-card"
+                [class.active]="selectedVariant()?.id === variant.id"
+                (click)="selectedVariant.set(variant)"
+              >
+                <div class="variant-info">
+                  <span *ngFor="let attr of variant.attributeValues | keyvalue" class="attr-tag">
+                    {{ attr.value }}
+                  </span>
+                </div>
+                <div class="variant-price" *ngIf="variant.price">
+                  {{ variant.price | currency:'PLN':'symbol':'1.2-2' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="price-box">
-            <div class="price">{{ product()?.price | currency:'PLN':'symbol':'1.2-2' }}</div>
-            <div class="availability">
-              <span class="dot"></span> Dostępny w magazynie
+            <div class="price">
+              {{ (selectedVariant()?.price || product()?.price) | currency:'PLN':'symbol':'1.2-2' }}
+            </div>
+            <div class="availability" [class.out-of-stock]="isOutOfStock()">
+              <span class="dot"></span> 
+              {{ isOutOfStock() ? 'Brak w magazynie' : 'Dostępny w magazynie' }}
+              <span class="stock-count" *ngIf="selectedVariant()">({{ selectedVariant()?.stockQuantity }} szt.)</span>
             </div>
           </div>
 
@@ -57,7 +85,13 @@ import { ProductDetail } from '../../../core/models/product.model';
               <input type="number" [(ngModel)]="quantity" readonly>
               <button (click)="changeQuantity(1)">+</button>
             </div>
-            <button class="btn btn-primary btn-lg btn-add">Dodaj do koszyka</button>
+            <button 
+              class="btn btn-primary btn-lg btn-add" 
+              (click)="addToCart()"
+              [disabled]="isOutOfStock()"
+            >
+              Dodaj do koszyka
+            </button>
           </div>
 
           <div class="short-description">
@@ -160,6 +194,20 @@ import { ProductDetail } from '../../../core/models/product.model';
     .short-description h3 { font-size: 18px; margin-bottom: 12px; }
     .short-description p { color: var(--text-muted); line-height: 1.8; }
 
+    .variants-section { margin-bottom: 32px; }
+    .variants-section h3 { font-size: 16px; margin-bottom: 16px; font-weight: 600; }
+    .variants-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .variant-card {
+      padding: 12px 20px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+      display: flex; flex-direction: column; gap: 4px; transition: all 0.2s;
+    }
+    .variant-card.active { border-color: var(--primary); background: rgba(var(--primary-rgb), 0.05); }
+    .attr-tag { font-size: 14px; font-weight: 600; }
+    .variant-price { font-size: 13px; color: var(--text-muted); }
+
+    .availability.out-of-stock { color: var(--error); }
+    .stock-count { font-size: 13px; opacity: 0.8; margin-left: 4px; }
+
     .detailed-info { margin-top: 80px; }
     .tabs { display: flex; gap: 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
     .tab-btn {
@@ -186,10 +234,13 @@ import { ProductDetail } from '../../../core/models/product.model';
 export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
+  private ui = inject(UiService);
 
   product = signal<ProductDetail | null>(null);
   isLoading = signal(true);
   selectedImage = signal<string | null>(null);
+  selectedVariant = signal<ProductVariant | null>(null);
   quantity = 1;
 
   ngOnInit() {
@@ -198,6 +249,10 @@ export class ProductDetailComponent implements OnInit {
       this.productService.getProductById(+id).subscribe(p => {
         this.product.set(p);
         this.isLoading.set(false);
+        // Auto-select first variant if available
+        if (p.variants && p.variants.length > 0) {
+          this.selectedVariant.set(p.variants[0]);
+        }
       });
     }
   }
@@ -207,7 +262,49 @@ export class ProductDetailComponent implements OnInit {
     return Object.keys(attrs).map(key => ({ key, values: attrs[key] }));
   }
 
+  isOutOfStock() {
+    if (this.product()?.variants?.length) {
+      return this.selectedVariant() ? this.selectedVariant()!.stockQuantity <= 0 : false;
+    }
+    return false; // Assuming base product stock is handled by variants
+  }
+
   changeQuantity(delta: number) {
     this.quantity = Math.max(1, this.quantity + delta);
+    if (this.selectedVariant() && this.quantity > this.selectedVariant()!.stockQuantity) {
+      this.quantity = this.selectedVariant()!.stockQuantity;
+    }
+  }
+
+  addToCart() {
+    const p = this.product();
+    if (!p) return;
+
+    // Use selected variant or first variant if only one exist and none selected
+    let variant = this.selectedVariant();
+    if (!variant && p.variants.length === 1) {
+      variant = p.variants[0];
+    }
+
+    if (!variant) {
+      this.ui.showToast('Proszę wybrać wariant produktu', 'error');
+      return;
+    }
+
+    const cartItem: CartItem = {
+      productId: p.id,
+      variantId: variant.id,
+      productName: p.name,
+      sku: variant.sku,
+      mainImageUrl: p.mainImageUrl,
+      price: variant.price || p.price,
+      quantity: this.quantity,
+      subtotal: (variant.price || p.price) * this.quantity,
+      attributes: variant.attributeValues
+    };
+
+    this.cartService.addToCart(cartItem).subscribe(() => {
+      this.ui.showToast('Dodano do koszyka!');
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -23,6 +24,21 @@ import { AuthService } from '../../../core/services/auth.service';
         <div class="nav-links-wrapper" [class.open]="isMenuOpen()">
           <div class="nav-links">
             <a routerLink="/products" routerLinkActive="active" (click)="isMenuOpen.set(false)">Produkty</a>
+            
+            <a routerLink="/cart" class="cart-link" (click)="isMenuOpen.set(false)">
+              <div class="cart-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cart-icon">
+                  <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                @if (cartService.cart().totalItems > 0) {
+                  <span class="badge">
+                    {{ cartService.cart().totalItems }}
+                  </span>
+                }
+              </div>
+            </a>
+
             @if (auth.isLoggedIn()) {
               <a routerLink="/account/orders" routerLinkActive="active" (click)="isMenuOpen.set(false)">Moje konto</a>
               <button class="btn btn-secondary btn-sm" (click)="auth.logout(); isMenuOpen.set(false)">Wyloguj</button>
@@ -133,9 +149,27 @@ import { AuthService } from '../../../core/services/auth.service';
       
       .btn { width: 100%; padding: 12px; font-size: 16px; }
     }
+
+    .cart-link {
+      display: flex; align-items: center; justify-content: center;
+      padding: 8px !important;
+      position: relative;
+    }
+    .cart-icon-wrapper { position: relative; height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; }
+    .cart-icon { width: 22px; height: 22px; }
+    .badge {
+      position: absolute; top: -5px; right: -5px;
+      background: var(--primary); color: white;
+      font-size: 10px; font-weight: 700;
+      min-width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(26,26,46,0.9);
+    }
   `]
 })
 export class NavbarComponent {
   auth = inject(AuthService);
+  cartService = inject(CartService);
   isMenuOpen = signal(false);
 }

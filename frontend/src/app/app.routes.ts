@@ -21,6 +21,16 @@ export const routes: Routes = [
     ]
   },
 
+  {
+    path: 'cart',
+    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent)
+  },
+
+  {
+    path: 'checkout',
+    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent) // Placeholder
+  },
+
   // Auth routes (public)
   {
     path: 'auth',
