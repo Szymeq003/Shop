@@ -17,6 +17,9 @@ public class OrderResponse {
     private LocalDateTime updatedAt;
     private List<OrderItemResponse> items;
     private OrderAddressResponse address;
+    private String shippingMethod;
+    private String paymentMethod;
+    private BigDecimal shippingFee;
 
     @Data
     @AllArgsConstructor

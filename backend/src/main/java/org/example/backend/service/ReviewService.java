@@ -40,7 +40,9 @@ public class ReviewService {
                 .comment(reviewDTO.getComment())
                 .build();
 
-        return convertToDTO(reviewRepository.save(review));
+        Review savedReview = reviewRepository.save(review);
+        updateProductStats(product);
+        return convertToDTO(savedReview);
     }
 
     @Transactional
@@ -53,7 +55,9 @@ public class ReviewService {
         review.setRating(reviewDTO.getRating());
         review.setComment(reviewDTO.getComment());
 
-        return convertToDTO(reviewRepository.save(review));
+        Review savedReview = reviewRepository.save(review);
+        updateProductStats(review.getProduct());
+        return convertToDTO(savedReview);
     }
 
     @Transactional
@@ -63,7 +67,9 @@ public class ReviewService {
         Review review = reviewRepository.findByIdAndUser(reviewId, user)
                 .orElseThrow(() -> new RuntimeException("Opinia nie znaleziona lub nie należy do Ciebie"));
 
+        Product product = review.getProduct();
         reviewRepository.delete(review);
+        updateProductStats(product);
     }
 
     public List<ReviewDTO> getUserReviews(String email) {
@@ -72,6 +78,17 @@ public class ReviewService {
         return reviewRepository.findByUser(user).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    private void updateProductStats(Product product) {
+        List<Review> productReviews = reviewRepository.findByProduct(product);
+        int count = productReviews.size();
+        double average = count > 0 ? 
+            productReviews.stream().mapToInt(Review::getRating).average().orElse(0.0) : 0.0;
+        
+        product.setAverageRating(average);
+        product.setReviewCount(count);
+        productRepository.save(product);
     }
 
     private ReviewDTO convertToDTO(Review review) {

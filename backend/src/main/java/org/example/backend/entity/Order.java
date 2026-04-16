@@ -40,6 +40,15 @@ public class Order {
     @Column(name = "payment_status", nullable = false)
     private String paymentStatus;
 
+    @Column(name = "shipping_method")
+    private String shippingMethod;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "shipping_fee")
+    private BigDecimal shippingFee;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -62,6 +71,6 @@ public class Order {
     }
 
     public enum Status {
-        nowe, oplacone, wyslane
+        nowe, oplacone, wyslane, anulowane
     }
 }

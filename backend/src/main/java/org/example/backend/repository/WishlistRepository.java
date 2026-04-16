@@ -11,8 +11,17 @@ import java.util.Optional;
 
 @Repository
 public interface WishlistRepository extends JpaRepository<WishlistItem, Long> {
-    List<WishlistItem> findByUser(User user);
-    Optional<WishlistItem> findByUserAndProduct(User user, Product product);
-    boolean existsByUserAndProduct(User user, Product product);
-    void deleteByUserAndProduct(User user, Product product);
+    List<WishlistItem> findByUser(@org.springframework.data.repository.query.Param("user") User user);
+    
+    Optional<WishlistItem> findByUserAndProduct(
+            @org.springframework.data.repository.query.Param("user") User user, 
+            @org.springframework.data.repository.query.Param("product") Product product);
+    
+    boolean existsByUserAndProduct(
+            @org.springframework.data.repository.query.Param("user") User user, 
+            @org.springframework.data.repository.query.Param("product") Product product);
+    
+    void deleteByUserAndProduct(
+            @org.springframework.data.repository.query.Param("user") User user, 
+            @org.springframework.data.repository.query.Param("product") Product product);
 }

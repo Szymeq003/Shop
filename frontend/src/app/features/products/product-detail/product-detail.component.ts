@@ -436,15 +436,28 @@ export class ProductDetailComponent implements OnInit {
     const productId = this.product()?.id;
     if (!productId) return;
 
-    if (this.isInWishlist()) {
-      this.wishlistService.removeFromWishlist(productId).subscribe(() => {
-        this.isInWishlist.set(false);
-        this.ui.showToast('Usunięto z ulubionych');
+    const originalState = this.isInWishlist();
+    this.isInWishlist.set(!originalState);
+
+    if (originalState) {
+      this.wishlistService.removeFromWishlist(productId).subscribe({
+        next: () => {
+          this.ui.showToast('Usunięto z ulubionych');
+        },
+        error: () => {
+          this.isInWishlist.set(originalState); // Revert
+          this.ui.showToast('Wystąpił błąd podczas usuwania', 'error');
+        }
       });
     } else {
-      this.wishlistService.addToWishlist(productId).subscribe(() => {
-        this.isInWishlist.set(true);
-        this.ui.showToast('Dodano do ulubionych!');
+      this.wishlistService.addToWishlist(productId).subscribe({
+        next: () => {
+          this.ui.showToast('Dodano do ulubionych!');
+        },
+        error: () => {
+          this.isInWishlist.set(originalState); // Revert
+          this.ui.showToast('Wystąpił błąd podczas dodawania', 'error');
+        }
       });
     }
   }

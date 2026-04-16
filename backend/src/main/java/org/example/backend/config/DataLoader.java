@@ -24,12 +24,10 @@ public class DataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // Cleanup dependent tables first to avoid FK constraint violations
-        wishlistRepository.deleteAll();
-        cartItemRepository.deleteAll();
-        cartRepository.deleteAll();
-        productRepository.deleteAll();
-        productAttributeRepository.deleteAll();
+        // Only seed if no products exist to avoid foreign key violations and data duplication
+        if (productRepository.count() > 0) {
+            return;
+        }
 
         // --- Categories ---
         Category laptopy = getOrCreateCategory("Laptopy i komputery", null);

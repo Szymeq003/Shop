@@ -6,6 +6,8 @@ import org.example.backend.entity.Product;
 import org.example.backend.entity.User;
 import org.example.backend.entity.WishlistItem;
 import org.example.backend.entity.ProductImage;
+import org.example.backend.entity.Review;
+import org.example.backend.entity.ProductVariant;
 import org.example.backend.repository.ProductRepository;
 import org.example.backend.repository.UserRepository;
 import org.example.backend.repository.WishlistRepository;
@@ -53,6 +55,7 @@ public class WishlistService {
                 .ifPresent(wishlistRepository::delete);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> getWishlist(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Użytkownik nie znaleziony"));
@@ -70,6 +73,10 @@ public class WishlistService {
                 .categoryId(product.getCategory().getId())
                 .categoryName(product.getCategory().getName())
                 .mainImageUrl(!product.getImages().isEmpty() ? product.getImages().get(0).getImagePath() : null)
+                .defaultVariantId(!product.getVariants().isEmpty() ? product.getVariants().get(0).getId() : null)
+                .averageRating(product.getReviews().isEmpty() ? 0.0 : 
+                    product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0))
+                .reviewCount(product.getReviews().size())
                 .build();
     }
 }

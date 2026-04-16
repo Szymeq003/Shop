@@ -71,9 +71,42 @@ import { UiService } from '../../core/services/ui.service';
             
             <div class="summary-divider"></div>
             
+            <div class="discount-section">
+              <label for="discount">Kod rabatowy</label>
+              <div class="discount-input-group">
+                <input 
+                  type="text" 
+                  id="discount" 
+                  [(ngModel)]="discountCodeInput" 
+                  placeholder="Wpisz swój kod"
+                  [disabled]="!!appliedDiscount"
+                >
+                <button 
+                  class="btn-apply" 
+                  (click)="applyDiscount()" 
+                  [disabled]="!discountCodeInput || !!appliedDiscount"
+                >
+                  Ok
+                </button>
+              </div>
+              <p class="discount-error" *ngIf="discountError">{{ discountError }}</p>
+              
+              <div class="applied-discount" *ngIf="appliedDiscount">
+                <span class="discount-name">Zastosowano kod: <strong>{{ appliedDiscount.code }}</strong></span>
+                <button class="btn-remove-discount" (click)="removeDiscount()" title="Usuń kod">✕</button>
+              </div>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row discount-row" *ngIf="appliedDiscount">
+              <span>Rabat ({{ appliedDiscount.code }}):</span>
+              <span class="discount-amount">-{{ getDiscountAmount() | currency:'PLN':'symbol':'1.2-2' }}</span>
+            </div>
+            
             <div class="summary-row total">
               <span>Razem do zapłaty:</span>
-              <span>{{ cart().totalPrice | currency:'PLN':'symbol':'1.2-2' }}</span>
+              <span>{{ getFinalPrice() | currency:'PLN':'symbol':'1.2-2' }}</span>
             </div>
 
             <button class="btn btn-primary btn-full btn-checkout" routerLink="/checkout">
@@ -178,6 +211,37 @@ import { UiService } from '../../core/services/ui.service';
     
     .summary-divider { height: 1px; background: var(--border); margin: 24px 0; }
     
+    .discount-section label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); }
+    .discount-input-group { display: flex; gap: 8px; }
+    .discount-input-group input {
+      flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px;
+    }
+    .discount-input-group input:focus { border-color: var(--primary); outline: none; }
+    .btn-apply {
+      padding: 0 16px; border-radius: 8px; background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary-light); font-weight: 600; border: none; cursor: pointer; transition: 0.2s;
+    }
+    .btn-apply:hover:not(:disabled) { background: var(--primary); color: white; }
+    .btn-apply:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .discount-error { color: var(--error); font-size: 12px; margin-top: 8px; }
+    
+    .applied-discount {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 12px; padding: 8px 12px; border-radius: 6px;
+      background: rgba(var(--success-rgb), 0.1); border: 1px solid rgba(var(--success-rgb), 0.2);
+    }
+    .discount-name { font-size: 13px; color: var(--success); }
+    .btn-remove-discount {
+      background: none; border: none; color: var(--success); cursor: pointer;
+      font-size: 14px; padding: 0 4px; display: flex; align-items: center; opacity: 0.7;
+    }
+    .btn-remove-discount:hover { opacity: 1; }
+
+    .discount-row { color: var(--success); font-weight: 600; }
+    .discount-amount { color: var(--error); }
+
     .btn-checkout { height: 56px; margin-top: 32px; border-radius: 12px; font-size: 16px; font-weight: 600; }
 
     .security-info {
@@ -209,6 +273,18 @@ export class CartComponent {
   ui = inject(UiService);
   cart = this.cartService.cart;
 
+  discountCodeInput = '';
+  discountError = '';
+  appliedDiscount: { code: string, type: 'percent' | 'fixed', value: number } | null = null;
+
+  // Przykładowe kody rabatowe
+  private validCodes: Record<string, { type: 'percent' | 'fixed', value: number }> = {
+    'RABAT10': { type: 'percent', value: 10 },
+    'HELLO20': { type: 'percent', value: 20 },
+    'PROMO15': { type: 'percent', value: 15 },
+    'NEWS50':  { type: 'fixed', value: 50 },  // Newsletter code
+  };
+
   updateQuantity(item: CartItem, delta: number) {
     this.cartService.updateQuantity(item.variantId, item.quantity + delta, item.id).subscribe();
   }
@@ -220,5 +296,54 @@ export class CartComponent {
         this.ui.showToast('Produkt został usunięty z koszyka', 'info');
       });
     }
+  }
+
+  applyDiscount() {
+    this.discountError = '';
+    const code = this.discountCodeInput.trim().toUpperCase();
+    
+    if (!code) return;
+
+    if (this.validCodes[code]) {
+      const discount = this.validCodes[code];
+      this.appliedDiscount = {
+        code: code,
+        type: discount.type,
+        value: discount.value
+      };
+      
+      const message = discount.type === 'percent' 
+        ? `Kod rabatowy ${code} na ${discount.value}% został naliczony! 🎉`
+        : `Kod rabatowy ${code} na ${discount.value} zł został naliczony! 🎉`;
+        
+      this.ui.showToast(message);
+    } else {
+      this.discountError = 'Nieprawidłowy lub przeterminowany kod rabatowy.';
+    }
+  }
+
+  removeDiscount() {
+    this.appliedDiscount = null;
+    this.discountCodeInput = '';
+    this.discountError = '';
+    this.ui.showToast('Kod rabatowy został usunięty.');
+  }
+
+  getDiscountAmount(): number {
+    if (!this.appliedDiscount) return 0;
+    
+    let discountAmount = 0;
+    if (this.appliedDiscount.type === 'percent') {
+      discountAmount = (this.cart().totalPrice * this.appliedDiscount.value) / 100;
+    } else if (this.appliedDiscount.type === 'fixed') {
+      discountAmount = this.appliedDiscount.value;
+    }
+    
+    // Zabezpieczenie przed ujemną ceną całkowitą produktów
+    return Math.min(discountAmount, this.cart().totalPrice);
+  }
+
+  getFinalPrice(): number {
+    return Math.max(0, this.cart().totalPrice - this.getDiscountAmount());
   }
 }

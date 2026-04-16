@@ -131,4 +131,51 @@ public class EmailService {
             throw new RuntimeException("Błąd wysyłania emaila powitalnego: " + e.getMessage());
         }
     }
+
+    @Async
+    public void sendNewsletterWelcomeEmail(String toEmail) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("Dziękujemy za zapis do newslettera! Twój kod rabatowy wewnątrz 🎉");
+
+            String html = """
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="color: #6c63ff; font-size: 28px;">Witaj w naszym Newsletterze!</h2>
+                        </div>
+                        <p style="font-size: 16px; color: #333;">Cześć,</p>
+                        <p style="font-size: 16px; color: #333; line-height: 1.5;">Dziękujemy za dołączenie do naszej społeczności! Obiecujemy wysyłać tylko najciekawsze nowości, porady i wyjątkowe oferty promocyjne.</p>
+                        
+                        <div style="background: linear-gradient(135deg, #f5f3ff, #ede9fe); border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+                            <p style="font-size: 16px; color: #6c63ff; margin-top: 0; font-weight: bold;">Twój prezent na start to 50 zł zniżki!</p>
+                            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Wpisz poniższy kod w koszyku (widoczny po lewej stronie) podczas składania swojego pierwszego zamówienia:</p>
+                            <div style="background: white; border: 2px dashed #6c63ff; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; color: #4c1d95; letter-spacing: 4px; display: inline-block;">
+                                NEWS50
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="%s"
+                               style="background-color: #6c63ff; color: white; padding: 16px 32px;
+                                      text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; display: inline-block;">
+                                Odbierz swój rabat
+                            </a>
+                        </div>
+                        
+                        <p style="color: #666; font-size: 14px; line-height: 1.5;">Kod jest ważny do końca roku. Regulamin promocji znajdziesz na naszej stronie.</p>
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                        <p style="color: #999; font-size: 12px; text-align: center;">Sklep &copy; 2025</p>
+                    </div>
+                    """.formatted(frontendUrl);
+
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Błąd wysyłania emaila newslettera: " + e.getMessage());
+        }
+    }
 }

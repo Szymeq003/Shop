@@ -283,9 +283,10 @@ tr:hover td { background: var(--card-hover); }
   font-size: 12px;
   font-weight: 600;
 }
-.badge-new { background: rgba(255,212,59,0.15); color: var(--warning); }
-.badge-paid { background: rgba(81,207,102,0.15); color: var(--success); }
-.badge-shipped { background: rgba(108,99,255,0.15); color: var(--primary-light); }
+.badge-new, .badge-nowe { background: rgba(255,212,59,0.15); color: var(--warning); }
+.badge-paid, .badge-oplacone { background: rgba(81,207,102,0.15); color: var(--success); }
+.badge-shipped, .badge-wyslane { background: rgba(108,99,255,0.15); color: var(--primary-light); }
+.badge-anulowane { background: rgba(255,107,107,0.12); color: var(--error); }
 
 /* ===== Spinner ===== */
 .spinner {

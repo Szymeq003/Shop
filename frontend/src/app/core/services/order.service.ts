@@ -28,6 +28,15 @@ export interface Order {
   updatedAt: string;
   items: OrderItem[];
   address: OrderAddress;
+  shippingMethod: string;
+  paymentMethod: string;
+  shippingFee: number;
+}
+
+export interface PlaceOrderRequest {
+  addressId: number;
+  shippingMethod: string;
+  paymentMethod: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,5 +51,17 @@ export class OrderService {
 
   getOrderById(id: number): Observable<Order> {
     return this.http.get<Order>(`${this.API}/${id}`);
+  }
+
+  placeOrder(request: PlaceOrderRequest): Observable<Order> {
+    return this.http.post<Order>(this.API, request);
+  }
+
+  cancelOrder(id: number): Observable<void> {
+    return this.http.post<void>(`${this.API}/${id}/cancel`, {});
+  }
+
+  confirmPayment(id: number): Observable<Order> {
+    return this.http.post<Order>(`${this.API}/${id}/pay`, {});
   }
 }

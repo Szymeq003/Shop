@@ -31,7 +31,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
           <div class="wishlist-grid" *ngIf="!isLoading()">
             <div *ngFor="let product of wishlist()">
-              <app-product-card [product]="product" [isInWishlist]="true"></app-product-card>
+              <app-product-card 
+                [product]="product" 
+                [isInWishlist]="true"
+                (wishlistChanged)="removeFromView($event)"
+              ></app-product-card>
             </div>
 
             <div class="empty-state" *ngIf="wishlist().length === 0">
@@ -111,5 +115,9 @@ export class WishlistComponent implements OnInit {
       },
       error: () => this.isLoading.set(false)
     });
+  }
+
+  removeFromView(productId: number) {
+    this.wishlist.update(list => list.filter(p => p.id !== productId));
   }
 }

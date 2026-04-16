@@ -28,7 +28,8 @@ export const routes: Routes = [
 
   {
     path: 'checkout',
-    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent) // Placeholder
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/cart/checkout/checkout.component').then(m => m.CheckoutComponent)
   },
 
   // Auth routes (public)
@@ -78,6 +79,10 @@ export const routes: Routes = [
       {
         path: 'orders/:id',
         loadComponent: () => import('./features/account/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
+      },
+      {
+        path: 'returns',
+        loadComponent: () => import('./features/account/returns/returns.component').then(m => m.ReturnsComponent)
       },
       {
         path: 'reviews',

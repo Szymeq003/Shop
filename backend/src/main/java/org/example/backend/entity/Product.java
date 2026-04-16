@@ -43,15 +43,24 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @org.hibernate.annotations.BatchSize(size = 20)
     private List<ProductImage> images = new ArrayList<>();
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @org.hibernate.annotations.BatchSize(size = 20)
     private List<ProductVariant> variants = new ArrayList<>();
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @org.hibernate.annotations.BatchSize(size = 20)
     private List<Review> reviews = new ArrayList<>();
+
+    @Column(name = "average_rating")
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    @Column(name = "review_count")
+    @Builder.Default
+    private Integer reviewCount = 0;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

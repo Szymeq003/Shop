@@ -44,6 +44,18 @@ public class ProductService {
         }
     }
 
+    @Transactional
+    public void syncAllProductRatings() {
+        productRepository.findAll().forEach(product -> {
+            int count = product.getReviews().size();
+            double average = count > 0 ? 
+                product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0) : 0.0;
+            product.setAverageRating(average);
+            product.setReviewCount(count);
+            productRepository.save(product);
+        });
+    }
+
     public ProductDetailDTO getProductById(Long id) {
         Product product = productRepository.findByIdAndStatus(id, Product.Status.AKTYWNY)
                 .orElseThrow(() -> new ResourceNotFoundException("Produkt nie znaleziony lub jest niedostępny"));
@@ -65,9 +77,8 @@ public class ProductService {
                 .categoryName(product.getCategory().getName())
                 .mainImageUrl(!product.getImages().isEmpty() ? product.getImages().get(0).getImagePath() : null)
                 .defaultVariantId(!product.getVariants().isEmpty() ? product.getVariants().get(0).getId() : null)
-                .averageRating(product.getReviews().isEmpty() ? 0.0 : 
-                    product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0))
-                .reviewCount(product.getReviews().size())
+                .averageRating(product.getAverageRating())
+                .reviewCount(product.getReviewCount())
                 .build();
     }
 
@@ -100,9 +111,8 @@ public class ProductService {
                 .variants(product.getVariants().stream().map(this::convertToVariantDTO).collect(Collectors.toList()))
                 .reviews(product.getReviews().stream().map(this::convertToReviewDTO).collect(Collectors.toList()))
                 .attributes(attributesMap)
-                .averageRating(product.getReviews().isEmpty() ? 0.0 : 
-                    product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0))
-                .reviewCount(product.getReviews().size())
+                .averageRating(product.getAverageRating())
+                .reviewCount(product.getReviewCount())
                 .build();
     }
 

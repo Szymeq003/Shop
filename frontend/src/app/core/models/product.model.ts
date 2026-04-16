@@ -34,6 +34,9 @@ export interface ProductSearchCriteria {
   categoryId?: number;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
+  brands?: string[];
+  inStock?: boolean;
   page?: number;
   size?: number;
   sort?: string;
