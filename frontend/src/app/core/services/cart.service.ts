@@ -14,6 +14,16 @@ export class CartService {
 
   cart = signal<Cart>({ items: [], totalPrice: 0, totalItems: 0 });
 
+  // Discount state shared between cart and checkout
+  appliedDiscount = signal<{ code: string; type: 'percent' | 'fixed'; value: number } | null>(null);
+
+  private readonly validCodes: Record<string, { type: 'percent' | 'fixed'; value: number }> = {
+    'RABAT10': { type: 'percent', value: 10 },
+    'HELLO20': { type: 'percent', value: 20 },
+    'PROMO15': { type: 'percent', value: 15 },
+    'NEWS50':  { type: 'fixed',   value: 50 },
+  };
+
   constructor() {
     // Initial load
     this.loadCart();
@@ -132,5 +142,36 @@ export class CartService {
     } else {
       this.fetchCartFromApi().subscribe();
     }
+  }
+
+  applyDiscount(code: string): { success: boolean; message: string } {
+    const key = code.trim().toUpperCase();
+    const discount = this.validCodes[key];
+    if (discount) {
+      this.appliedDiscount.set({ code: key, type: discount.type, value: discount.value });
+      const msg = discount.type === 'percent'
+        ? `Kod rabatowy ${key} na ${discount.value}% został naliczony! 🎉`
+        : `Kod rabatowy ${key} na ${discount.value} zł został naliczony! 🎉`;
+      return { success: true, message: msg };
+    }
+    return { success: false, message: 'Nieprawidłowy lub przeterminowany kod rabatowy.' };
+  }
+
+  removeDiscount() {
+    this.appliedDiscount.set(null);
+  }
+
+  getDiscountAmount(): number {
+    const discount = this.appliedDiscount();
+    if (!discount) return 0;
+    const total = this.cart().totalPrice;
+    const amount = discount.type === 'percent'
+      ? (total * discount.value) / 100
+      : discount.value;
+    return Math.min(amount, total);
+  }
+
+  getFinalPrice(): number {
+    return Math.max(0, this.cart().totalPrice - this.getDiscountAmount());
   }
 }

@@ -64,10 +64,6 @@ import { UiService } from '../../core/services/ui.service';
               <span>Wartość produktów:</span>
               <span>{{ cart().totalPrice | currency:'PLN':'symbol':'1.2-2' }}</span>
             </div>
-            <div class="summary-row">
-              <span>Dostawa:</span>
-              <span class="free">Gratis</span>
-            </div>
             
             <div class="summary-divider"></div>
             
@@ -79,28 +75,28 @@ import { UiService } from '../../core/services/ui.service';
                   id="discount" 
                   [(ngModel)]="discountCodeInput" 
                   placeholder="Wpisz swój kod"
-                  [disabled]="!!appliedDiscount"
+                  [disabled]="!!appliedDiscount()"
                 >
                 <button 
                   class="btn-apply" 
                   (click)="applyDiscount()" 
-                  [disabled]="!discountCodeInput || !!appliedDiscount"
+                  [disabled]="!discountCodeInput || !!appliedDiscount()"
                 >
                   Ok
                 </button>
               </div>
               <p class="discount-error" *ngIf="discountError">{{ discountError }}</p>
               
-              <div class="applied-discount" *ngIf="appliedDiscount">
-                <span class="discount-name">Zastosowano kod: <strong>{{ appliedDiscount.code }}</strong></span>
+              <div class="applied-discount" *ngIf="appliedDiscount()">
+                <span class="discount-name">Zastosowano kod: <strong>{{ appliedDiscount()!.code }}</strong></span>
                 <button class="btn-remove-discount" (click)="removeDiscount()" title="Usuń kod">✕</button>
               </div>
             </div>
 
             <div class="summary-divider"></div>
 
-            <div class="summary-row discount-row" *ngIf="appliedDiscount">
-              <span>Rabat ({{ appliedDiscount.code }}):</span>
+            <div class="summary-row discount-row" *ngIf="appliedDiscount()">
+              <span>Rabat ({{ appliedDiscount()!.code }}):</span>
               <span class="discount-amount">-{{ getDiscountAmount() | currency:'PLN':'symbol':'1.2-2' }}</span>
             </div>
             
@@ -139,18 +135,10 @@ export class CartComponent {
   cartService = inject(CartService);
   ui = inject(UiService);
   cart = this.cartService.cart;
+  appliedDiscount = this.cartService.appliedDiscount;
 
   discountCodeInput = '';
   discountError = '';
-  appliedDiscount: { code: string, type: 'percent' | 'fixed', value: number } | null = null;
-
-  // Przykładowe kody rabatowe
-  private validCodes: Record<string, { type: 'percent' | 'fixed', value: number }> = {
-    'RABAT10': { type: 'percent', value: 10 },
-    'HELLO20': { type: 'percent', value: 20 },
-    'PROMO15': { type: 'percent', value: 15 },
-    'NEWS50':  { type: 'fixed', value: 50 },  // Newsletter code
-  };
 
   updateQuantity(item: CartItem, delta: number) {
     this.cartService.updateQuantity(item.variantId, item.quantity + delta, item.id).subscribe();
@@ -167,50 +155,21 @@ export class CartComponent {
 
   applyDiscount() {
     this.discountError = '';
-    const code = this.discountCodeInput.trim().toUpperCase();
-    
-    if (!code) return;
-
-    if (this.validCodes[code]) {
-      const discount = this.validCodes[code];
-      this.appliedDiscount = {
-        code: code,
-        type: discount.type,
-        value: discount.value
-      };
-      
-      const message = discount.type === 'percent' 
-        ? `Kod rabatowy ${code} na ${discount.value}% został naliczony! 🎉`
-        : `Kod rabatowy ${code} na ${discount.value} zł został naliczony! 🎉`;
-        
-      this.ui.showToast(message);
+    const result = this.cartService.applyDiscount(this.discountCodeInput);
+    if (result.success) {
+      this.ui.showToast(result.message);
     } else {
-      this.discountError = 'Nieprawidłowy lub przeterminowany kod rabatowy.';
+      this.discountError = result.message;
     }
   }
 
   removeDiscount() {
-    this.appliedDiscount = null;
+    this.cartService.removeDiscount();
     this.discountCodeInput = '';
     this.discountError = '';
     this.ui.showToast('Kod rabatowy został usunięty.');
   }
 
-  getDiscountAmount(): number {
-    if (!this.appliedDiscount) return 0;
-    
-    let discountAmount = 0;
-    if (this.appliedDiscount.type === 'percent') {
-      discountAmount = (this.cart().totalPrice * this.appliedDiscount.value) / 100;
-    } else if (this.appliedDiscount.type === 'fixed') {
-      discountAmount = this.appliedDiscount.value;
-    }
-    
-    // Zabezpieczenie przed ujemną ceną całkowitą produktów
-    return Math.min(discountAmount, this.cart().totalPrice);
-  }
-
-  getFinalPrice(): number {
-    return Math.max(0, this.cart().totalPrice - this.getDiscountAmount());
-  }
+  getDiscountAmount(): number { return this.cartService.getDiscountAmount(); }
+  getFinalPrice(): number     { return this.cartService.getFinalPrice(); }
 }

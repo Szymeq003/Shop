@@ -69,9 +69,11 @@ import { EmployeeService, OrderResponse } from '../../../core/services/employee.
                 <td><span class="price-text">{{ order.totalPrice | currency:'PLN' }}</span></td>
                 <td>
                   <span class="badge" 
-                    [class.badge-new]="order.status === 'nowe'"
-                    [class.badge-paid]="order.status === 'oplacone' || order.status === 'dostarczone'"
-                    [class.badge-shipped]="order.status === 'wyslane' || order.status === 'pakowane'"
+                    [class.badge-nowe]="order.status === 'nowe'"
+                    [class.badge-oplacone]="order.status === 'oplacone'"
+                    [class.badge-pakowane]="order.status === 'pakowane'"
+                    [class.badge-wyslane]="order.status === 'wyslane'"
+                    [class.badge-dostarczone]="order.status === 'dostarczone'"
                     [class.badge-anulowane]="order.status === 'anulowane'">
                     {{ getStatusLabel(order.status) }}
                   </span>

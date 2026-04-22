@@ -17,9 +17,11 @@ import { EmployeeService, OrderResponse } from '../../../core/services/employee.
           </a>
           @if (order(); as o) {
             <span class="badge" 
-              [class.badge-new]="o.status === 'nowe'"
-              [class.badge-paid]="o.status === 'oplacone' || o.status === 'dostarczone'"
-              [class.badge-shipped]="o.status === 'wyslane' || o.status === 'pakowane'"
+              [class.badge-nowe]="o.status === 'nowe'"
+              [class.badge-oplacone]="o.status === 'oplacone'"
+              [class.badge-pakowane]="o.status === 'pakowane'"
+              [class.badge-wyslane]="o.status === 'wyslane'"
+              [class.badge-dostarczone]="o.status === 'dostarczone'"
               [class.badge-anulowane]="o.status === 'anulowane'">
               {{ getStatusLabel(o.status) }}
             </span>

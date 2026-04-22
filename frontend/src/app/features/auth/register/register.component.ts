@@ -2,11 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CommonModule],
   template: `
     <div class="auth-page">
       <div class="auth-card">
@@ -40,6 +41,9 @@ import { AuthService } from '../../../core/services/auth.service';
               #name="ngModel"
               [class.error]="name.invalid && name.touched"
             >
+            @if (name.invalid && name.touched) {
+              <span class="error-message">Imię i nazwisko jest wymagane</span>
+            }
           </div>
 
           <div class="form-group">
@@ -55,6 +59,12 @@ import { AuthService } from '../../../core/services/auth.service';
               #email="ngModel"
               [class.error]="email.invalid && email.touched"
             >
+            @if (email.invalid && email.touched) {
+              <span class="error-message">
+                @if (email.errors?.['required']) { Email jest wymagany }
+                @else if (email.errors?.['email']) { Nieprawidłowy format email }
+              </span>
+            }
           </div>
 
           <div class="form-group">
@@ -90,12 +100,37 @@ import { AuthService } from '../../../core/services/auth.service';
                 }
               </button>
             </div>
+            @if (password.invalid && password.touched) {
+              <span class="error-message">
+                @if (password.errors?.['required']) { Hasło jest wymagane }
+                @else if (password.errors?.['minlength']) { Hasło musi mieć co najmniej 8 znaków }
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Potwierdź hasło</label>
+            <div class="password-wrapper">
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                id="confirmPassword"
+                name="confirmPassword"
+                [(ngModel)]="registerData.confirmPassword"
+                required
+                placeholder="Powtórz hasło"
+                #confirmPassword="ngModel"
+                [class.error]="(confirmPassword.invalid && confirmPassword.touched) || (confirmPassword.touched && registerData.password !== registerData.confirmPassword)"
+              >
+            </div>
+            @if (confirmPassword.touched && registerData.password !== registerData.confirmPassword) {
+              <span class="error-message">Hasła nie są identyczne</span>
+            }
           </div>
 
           <button
             type="submit"
             class="btn btn-primary btn-full"
-            [disabled]="registerForm.invalid || isLoading()"
+            [disabled]="registerForm.invalid || isLoading() || registerData.password !== registerData.confirmPassword"
             style="margin-top: 12px;"
           >
             @if (isLoading()) {
@@ -120,7 +155,8 @@ export class RegisterComponent {
   registerData = {
     name: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   };
 
   isLoading = signal(false);
@@ -129,15 +165,22 @@ export class RegisterComponent {
   showPassword = signal(false);
 
   onSubmit() {
+    if (this.registerData.password !== this.registerData.confirmPassword) {
+      this.errorMessage.set('Hasła nie są identyczne');
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    this.authService.register(this.registerData).subscribe({
+    const { name, email, password } = this.registerData;
+
+    this.authService.register({ name, email, password }).subscribe({
       next: () => {
-        this.successMessage.set('Konto utworzone! Możesz się teraz zalogować.');
+        this.successMessage.set('Konto utworzone! Sprawdź e-mail, aby aktywować konto.');
         this.isLoading.set(false);
-        setTimeout(() => this.router.navigate(['/auth/login']), 2000);
+        setTimeout(() => this.router.navigate(['/auth/login']), 3000);
       },
       error: (err) => {
         this.isLoading.set(false);

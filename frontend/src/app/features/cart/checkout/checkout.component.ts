@@ -170,6 +170,10 @@ interface PaymentOption {
                   <span>Wartość produktów</span>
                   <span>{{ cart().totalPrice | currency:'PLN' }}</span>
                 </div>
+                <div class="price-row" *ngIf="cartService.appliedDiscount()">
+                  <span>Rabat ({{ cartService.appliedDiscount()?.code }})</span>
+                  <span class="discount-amount">-{{ cartService.getDiscountAmount() | currency:'PLN' }}</span>
+                </div>
                 <div class="price-row">
                   <span>Koszt dostawy</span>
                   <span [class.free-text]="getShippingPrice() === 0">
@@ -178,7 +182,7 @@ interface PaymentOption {
                 </div>
                 <div class="price-row total">
                   <span>Suma całkowita</span>
-                  <span>{{ cart().totalPrice + getShippingPrice() | currency:'PLN' }}</span>
+                  <span>{{ cartService.getFinalPrice() + getShippingPrice() | currency:'PLN' }}</span>
                 </div>
               </div>
               <p class="terms">Klikając „Zamawiam i płacę", akceptujesz regulamin sklepu.</p>
@@ -214,7 +218,7 @@ interface PaymentOption {
       <div class="payment-modal" id="payment-modal">
         <div class="modal-head">
           <div class="modal-logo">🔒 Bezpieczna płatność</div>
-          <div class="modal-amount">{{ (cart().totalPrice + getShippingPrice()) | currency:'PLN' }}</div>
+          <div class="modal-amount">{{ (cartService.getFinalPrice() + getShippingPrice()) | currency:'PLN' }}</div>
         </div>
 
         <!-- BLIK -->
@@ -294,7 +298,7 @@ interface PaymentOption {
           <div class="transfer-box">
             <div class="transfer-row"><span>Odbiorca:</span><strong>Shop Sp. z o.o.</strong></div>
             <div class="transfer-row"><span>Numer konta:</span><strong>PL 12 1234 5678 9012 3456 7890 1234</strong></div>
-            <div class="transfer-row"><span>Kwota:</span><strong>{{ (cart().totalPrice + getShippingPrice()) | currency:'PLN' }}</strong></div>
+            <div class="transfer-row"><span>Kwota:</span><strong>{{ (cartService.getFinalPrice() + getShippingPrice()) | currency:'PLN' }}</strong></div>
             <div class="transfer-row"><span>Tytuł:</span><strong>Zamówienie #{{ placedOrderId() }}</strong></div>
           </div>
         </div>
@@ -307,7 +311,7 @@ interface PaymentOption {
             (click)="processPayment()"
           >
             <span *ngIf="isPaymentProcessing()" class="pay-spinner"></span>
-            {{ isPaymentProcessing() ? 'Przetwarzanie...' : 'Zapłać ' + ((cart().totalPrice + getShippingPrice()) | currency:'PLN') }}
+            {{ isPaymentProcessing() ? 'Przetwarzanie...' : 'Zapłać ' + ((cartService.getFinalPrice() + getShippingPrice()) | currency:'PLN') }}
           </button>
         </div>
       </div>
@@ -317,29 +321,30 @@ interface PaymentOption {
 })
 export class CheckoutComponent implements OnInit {
   private addressService = inject(AddressService);
-  private cartService = inject(CartService);
+  cartService = inject(CartService);
   private orderService = inject(OrderService);
   private ui = inject(UiService);
   private router = inject(Router);
 
+  cart = this.cartService.cart;
+
   readonly shippingOptions: ShippingOption[] = [
-    { id: 'Kurier DPD',     name: 'Kurier DPD',        desc: 'Dostawa do drzwi',         price: 15, eta: '1–2 dni robocze',   icon: '📦' },
-    { id: 'Kurier DHL',     name: 'Kurier DHL',        desc: 'Dostawa do drzwi',         price: 18, eta: '1–2 dni robocze',   icon: '🟡' },
-    { id: 'FedEx Express',  name: 'FedEx Express',     desc: 'Dostawa ekspresowa',       price: 25, eta: 'Następny dzień',    icon: '🚀' },
-    { id: 'Paczkomat InPost', name: 'Paczkomat InPost', desc: 'Dostawa do paczkomatu',  price: 12, eta: '1–2 dni robocze',   icon: '🏪' },
-    { id: 'Odbior osobisty', name: 'Odbiór osobisty',  desc: 'Warszawa, ul. Sklepowa 1', price: 0,  eta: 'Pon–Pt 9:00–17:00', icon: '🏬' },
+    { id: 'Kurier DPD',       name: 'Kurier DPD',        desc: 'Dostawa do drzwi',         price: 15, eta: '1–2 dni robocze',   icon: '📦' },
+    { id: 'Kurier DHL',       name: 'Kurier DHL',        desc: 'Dostawa do drzwi',         price: 18, eta: '1–2 dni robocze',   icon: '🟡' },
+    { id: 'FedEx Express',    name: 'FedEx Express',     desc: 'Dostawa ekspresowa',       price: 25, eta: 'Następny dzień',    icon: '🚀' },
+    { id: 'Paczkomat InPost', name: 'Paczkomat InPost',  desc: 'Dostawa do paczkomatu',    price: 12, eta: '1–2 dni robocze',   icon: '🏪' },
+    { id: 'Odbior osobisty',  name: 'Odbiór osobisty',   desc: 'Warszawa, ul. Sklepowa 1', price: 0,  eta: 'Pon–Pt 9:00–17:00', icon: '🏬' },
   ];
 
   readonly paymentOptions: PaymentOption[] = [
-    { id: 'BLIK',              name: 'BLIK',              desc: 'Szybka płatność kodem z aplikacji bankowej', icon: '📱', type: 'blik'     },
-    { id: 'Karta płatnicza',   name: 'Karta płatnicza',   desc: 'Visa, Mastercard, American Express',         icon: '💳', type: 'card'     },
-    { id: 'Google Pay',        name: 'Google Pay',        desc: 'Płatność jednym dotknięciem',                icon: '🔵', type: 'google'   },
-    { id: 'Apple Pay',         name: 'Apple Pay',         desc: 'Touch ID lub Face ID',                       icon: '🍎', type: 'apple'    },
-    { id: 'Przelew bankowy',   name: 'Przelew bankowy',   desc: 'Tradycyjny przelew — realizacja do 24h',     icon: '🏦', type: 'transfer' },
+    { id: 'BLIK',            name: 'BLIK',            desc: 'Szybka płatność kodem z aplikacji bankowej', icon: '📱', type: 'blik'     },
+    { id: 'Karta płatnicza', name: 'Karta płatnicza', desc: 'Visa, Mastercard, American Express',         icon: '💳', type: 'card'     },
+    { id: 'Google Pay',      name: 'Google Pay',      desc: 'Płatność jednym dotknięciem',                icon: '🔵', type: 'google'   },
+    { id: 'Apple Pay',       name: 'Apple Pay',       desc: 'Touch ID lub Face ID',                       icon: '🍎', type: 'apple'    },
+    { id: 'Przelew bankowy', name: 'Przelew bankowy', desc: 'Tradycyjny przelew — realizacja do 24h',     icon: '🏦', type: 'transfer' },
   ];
 
   addresses = signal<Address[]>([]);
-  cart = this.cartService.cart;
 
   currentStep = signal(1);
   selectedAddressId = signal<number | null>(null);

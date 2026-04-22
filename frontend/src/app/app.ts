@@ -13,7 +13,9 @@ import { AuthService } from './core/services/auth.service';
   imports: [RouterOutlet, NavbarComponent, ToastComponent, ConfirmModalComponent, NewsletterComponent, ScrollTopComponent],
   template: `
     <app-navbar />
-    <router-outlet />
+    <div style="min-height: calc(100vh - 70px);">
+      <router-outlet />
+    </div>
     @if (auth.currentUser()?.role !== 'pracownik') {
       <app-newsletter />
     }

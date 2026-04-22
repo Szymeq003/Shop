@@ -34,7 +34,7 @@ import { FormsModule } from '@angular/forms';
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
               <!-- Pay now button for unpaid non-cancelled orders -->
               <button
-                *ngIf="order()?.status !== 'anulowane' && order()?.paymentStatus !== 'Opłacone'"
+                *ngIf="order() && order()?.status !== 'anulowane' && order()?.paymentStatus !== 'Opłacone'"
                 class="btn-pay-now"
                 (click)="openPayModal()"
                 [disabled]="isPayingNow()"
@@ -54,7 +54,9 @@ import { FormsModule } from '@angular/forms';
           </div>
 
           @if (isLoading()) {
-            <div class="spinner"></div>
+            <div style="min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+              <div class="spinner" style="margin: 0;"></div>
+            </div>
           } @else if (order()) {
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
 
@@ -309,7 +311,7 @@ export class OrderDetailComponent implements OnInit {
 
   statusLabel(s?: string): string {
     const map: Record<string, string> = {
-      nowe: 'Nowe', oplacone: 'Opłacone', wyslane: 'Wysłane', anulowane: 'Anulowane'
+      nowe: 'Nowe', oplacone: 'Opłacone', pakowane: 'Pakowane', wyslane: 'Wysłane', dostarczone: 'Dostarczone', anulowane: 'Anulowane'
     };
     return map[s ?? ''] ?? s ?? '';
   }
