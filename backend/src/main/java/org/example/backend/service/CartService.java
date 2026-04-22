@@ -26,7 +26,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductVariantRepository variantRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CartDTO getCartDTO(User user) {
         Cart cart = getOrCreateCart(user);
         return convertToDTO(cart);

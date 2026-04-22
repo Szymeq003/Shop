@@ -52,45 +52,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       </div>
     </div>
   `,
-  styles: [`
-    .wishlist-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 32px;
-    }
 
-    .loading-state { display: flex; justify-content: center; padding: 40px; }
-    .spinner {
-      width: 40px; height: 40px; border: 3px solid rgba(var(--primary-rgb), 0.1);
-      border-top-color: var(--primary); border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 60px 20px;
-    }
-    
-    .empty-state .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-    
-    .empty-state h3 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    
-    .empty-state p {
-      color: var(--text-muted);
-      max-width: 400px;
-      margin: 0 auto;
-    }
-  `]
 })
 export class WishlistComponent implements OnInit {
   private wishlistService = inject(WishlistService);

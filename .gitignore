@@ -23,3 +23,6 @@ Thumbs.db
 # Database
 shop.sql
 mysql_data/
+
+# Error Logs
+last_error.log

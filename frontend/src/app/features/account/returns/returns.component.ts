@@ -85,22 +85,7 @@ import { OrderService, Order } from '../../../core/services/order.service';
       </div>
     </div>
   `,
-  styles: [`
-    .return-info-card {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      margin-top: 24px;
-      padding: 20px 24px;
-      background: rgba(255, 107, 107, 0.06);
-      border: 1px solid rgba(255, 107, 107, 0.2);
-      border-radius: var(--radius);
-      font-size: 14px;
-    }
-    .return-info-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
-    .return-info-card strong { display: block; margin-bottom: 4px; color: var(--text); }
-    .return-info-card p { color: var(--text-muted); margin: 0; line-height: 1.5; }
-  `]
+
 })
 export class ReturnsComponent implements OnInit {
   private authService = inject(AuthService);

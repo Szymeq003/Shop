@@ -24,52 +24,7 @@ import { UiService } from '../../../core/services/ui.service';
       }
     </div>
   `,
-  styles: [`
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      pointer-events: none;
-    }
-    .toast {
-      pointer-events: auto;
-      min-width: 300px;
-      padding: 16px;
-      border-radius: 12px;
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      transition: transform 0.2s;
-    }
-    .toast:hover { transform: scale(1.02); }
-    .toast.success { border-left: 4px solid var(--success); }
-    .toast.error { border-left: 4px solid var(--error); }
-    .toast.info { border-left: 4px solid var(--primary); }
-    
-    .icon { width: 20px; height: 20px; flex-shrink: 0; }
-    .icon svg { width: 100%; height: 100%; }
-    .success .icon { color: var(--success); }
-    .error .icon { color: var(--error); }
-    .info .icon { color: var(--primary); }
 
-    .message { font-size: 14px; font-weight: 500; }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-  `]
 })
 export class ToastComponent {
   ui = inject(UiService);

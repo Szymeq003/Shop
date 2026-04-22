@@ -19,27 +19,7 @@ import { CommonModule } from '@angular/common';
       }
     </div>
   `,
-  styles: [`
-    .star-rating {
-      display: inline-flex;
-      gap: 2px;
-      font-size: 1.5rem;
-      color: #ccc;
-    }
-    .star {
-      cursor: pointer;
-      transition: color 0.2s, transform 0.2s;
-    }
-    .star.filled {
-      color: #ffc107;
-    }
-    .readonly .star {
-      cursor: default;
-    }
-    .star:not(.readonly):hover {
-      transform: scale(1.2);
-    }
-  `]
+
 })
 export class StarRatingComponent {
   @Input() rating: number = 0;

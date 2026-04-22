@@ -113,8 +113,12 @@ export class LoginComponent {
     this.errorMessage.set(null);
 
     this.authService.login(this.loginData).subscribe({
-      next: () => {
-        this.router.navigate(['/account/orders']);
+      next: (res) => {
+        if (res.role === 'pracownik') {
+          this.router.navigate(['/employee']);
+        } else {
+          this.router.navigate(['/account/orders']);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

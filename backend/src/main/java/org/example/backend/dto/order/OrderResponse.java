@@ -20,11 +20,14 @@ public class OrderResponse {
     private String shippingMethod;
     private String paymentMethod;
     private BigDecimal shippingFee;
+    private String customerName;
+    private String customerEmail;
 
     @Data
     @AllArgsConstructor
     public static class OrderItemResponse {
         private Long productId;
+        private String productName;
         private Long variantId;
         private Integer quantity;
         private BigDecimal price;

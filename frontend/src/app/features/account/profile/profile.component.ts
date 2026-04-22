@@ -14,11 +14,13 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="account-layout">
         <aside class="account-nav">
           <h3 style="margin-bottom: 20px; font-size: 16px; padding: 0 14px;">Cześć {{ profileData().name.split(' ')[0] }}</h3>
-          <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
-          <a routerLink="/account/returns" routerLinkActive="active">Zwroty</a>
-          <a routerLink="/account/wishlist" routerLinkActive="active">Obserwowane</a>
-          <a routerLink="/account/reviews" routerLinkActive="active">Opinie</a>
-          <a routerLink="/account/addresses" routerLinkActive="active">Dane dostawy</a>
+          @if (authService.currentUser()?.role !== 'pracownik') {
+            <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
+            <a routerLink="/account/returns" routerLinkActive="active">Zwroty</a>
+            <a routerLink="/account/wishlist" routerLinkActive="active">Obserwowane</a>
+            <a routerLink="/account/reviews" routerLinkActive="active">Opinie</a>
+            <a routerLink="/account/addresses" routerLinkActive="active">Dane dostawy</a>
+          }
           <a routerLink="/account/profile" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Ustawienia konta</a>
         </aside>
 
@@ -29,92 +31,94 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           <!-- Dane osobowe -->
-          <section class="card" style="margin-bottom: 32px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-              <h3 style="font-size: 18px; margin: 0;">Dane podstawowe</h3>
-              @if (!isEditMode()) {
-                <button (click)="isEditMode.set(true)" class="btn btn-secondary btn-sm">Edytuj</button>
-              }
-            </div>
-            
-            @if (profileError()) {
-              <div class="alert alert-error">{{ profileError() }}</div>
-            }
-            @if (profileSuccess()) {
-              <div class="alert alert-success">{{ profileSuccess() }}</div>
-            }
-
-            @if (!isEditMode()) {
-              <div class="info-grid">
-                <div class="info-item">
-                  <label>Imię i nazwisko</label>
-                  <p>{{ profileData().name }}</p>
-                </div>
-                <div class="info-item">
-                  <label>Adres e-mail</label>
-                  <p>{{ profileData().email }}</p>
-                </div>
-                <div class="info-item">
-                  <label>Numer telefonu</label>
-                  <p>{{ profileData().phone || 'Nie podano' }}</p>
-                </div>
+          @if (authService.currentUser()?.role !== 'pracownik') {
+            <section class="card" style="margin-bottom: 32px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                <h3 style="font-size: 18px; margin: 0;">Dane podstawowe</h3>
+                @if (!isEditMode()) {
+                  <button (click)="isEditMode.set(true)" class="btn btn-secondary btn-sm">Edytuj</button>
+                }
               </div>
-            } @else {
-              <form (ngSubmit)="updateProfile()" #profileForm="ngForm">
-                <div class="form-group">
-                  <label for="name">Imię i nazwisko</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    [(ngModel)]="editData.name"
-                    required
-                    #nameField="ngModel"
-                  >
-                </div>
+              
+              @if (profileError()) {
+                <div class="alert alert-error">{{ profileError() }}</div>
+              }
+              @if (profileSuccess()) {
+                <div class="alert alert-success">{{ profileSuccess() }}</div>
+              }
 
-                <div class="form-group">
-                  <label for="phone">Numer telefonu</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    [(ngModel)]="editData.phone"
-                    placeholder="+48 000 000 000"
-                  >
+              @if (!isEditMode()) {
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Imię i nazwisko</label>
+                    <p>{{ profileData().name }}</p>
+                  </div>
+                  <div class="info-item">
+                    <label>Adres e-mail</label>
+                    <p>{{ profileData().email }}</p>
+                  </div>
+                  <div class="info-item">
+                    <label>Numer telefonu</label>
+                    <p>{{ profileData().phone || 'Nie podano' }}</p>
+                  </div>
                 </div>
+              } @else {
+                <form (ngSubmit)="updateProfile()" #profileForm="ngForm">
+                  <div class="form-group">
+                    <label for="name">Imię i nazwisko</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      [(ngModel)]="editData.name"
+                      required
+                      #nameField="ngModel"
+                    >
+                  </div>
 
-                <div class="form-group">
-                  <label for="email">E-mail (nieedytowalny)</label>
-                  <input
-                    type="email"
-                    id="email"
-                    [value]="profileData().email"
-                    disabled
-                    style="opacity: 0.6; cursor: not-allowed;"
-                  >
-                </div>
+                  <div class="form-group">
+                    <label for="phone">Numer telefonu</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      [(ngModel)]="editData.phone"
+                      placeholder="+48 000 000 000"
+                    >
+                  </div>
 
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                  <button
-                    type="submit"
-                    class="btn btn-primary"
-                    [disabled]="profileForm.invalid || isUpdatingProfile()"
-                  >
-                    @if (isUpdatingProfile()) { Zapisywanie... } @else { Zapisz zmiany }
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary"
-                    (click)="cancelEdit()"
-                    [disabled]="isUpdatingProfile()"
-                  >
-                    Anuluj
-                  </button>
-                </div>
-              </form>
-            }
-          </section>
+                  <div class="form-group">
+                    <label for="email">E-mail (nieedytowalny)</label>
+                    <input
+                      type="email"
+                      id="email"
+                      [value]="profileData().email"
+                      disabled
+                      style="opacity: 0.6; cursor: not-allowed;"
+                    >
+                  </div>
+
+                  <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      [disabled]="profileForm.invalid || isUpdatingProfile()"
+                    >
+                      @if (isUpdatingProfile()) { Zapisywanie... } @else { Zapisz zmiany }
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      (click)="cancelEdit()"
+                      [disabled]="isUpdatingProfile()"
+                    >
+                      Anuluj
+                    </button>
+                  </div>
+                </form>
+              }
+            </section>
+          }
 
           <!-- Zmiana hasła -->
           <section class="card">
@@ -243,32 +247,11 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
     </div>
   `,
-  styles: [`
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    .info-item label {
-      display: block;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .info-item p {
-      font-weight: 500;
-      font-size: 15px;
-      margin: 0;
-    }
-    .btn-sm {
-      padding: 6px 14px;
-      font-size: 13px;
-    }
-  `]
+
 })
 export class ProfileComponent implements OnInit {
   private userService = inject(UserService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
 
   profileData = signal({
     name: '',

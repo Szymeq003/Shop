@@ -22,4 +22,5 @@ public class ProductDTO {
     private Long defaultVariantId;
     private Double averageRating;
     private Integer reviewCount;
+    private String status;
 }

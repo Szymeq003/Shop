@@ -35,6 +35,36 @@ public class OrderService {
         return toResponse(order);
     }
 
+    public List<OrderResponse> getAllOrdersForEmployee() {
+        return orderRepository.findAllWithItems()
+                .stream().map(this::toResponse).toList();
+    }
+
+    public OrderResponse getOrderByIdForEmployee(Long id) {
+        Order order = orderRepository.findByIdWithItems(id)
+                .orElseThrow(() -> new RuntimeException("Zamówienie nie znalezione"));
+        return toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long id, Order.Status status) {
+        Order order = orderRepository.findByIdWithItems(id)
+                .orElseThrow(() -> new RuntimeException("Zamówienie nie znalezione"));
+        
+        order.setStatus(status);
+        if (status == Order.Status.anulowane) {
+            // Restore stock if canceled
+            for (OrderItem item : order.getItems()) {
+                productVariantRepository.findById(item.getVariantId()).ifPresent(variant -> {
+                    variant.setStockQuantity(variant.getStockQuantity() + item.getQuantity());
+                    productVariantRepository.save(variant);
+                });
+            }
+        }
+        
+        return toResponse(orderRepository.save(order));
+    }
+
     @Transactional
     public OrderResponse placeOrder(String email, PlaceOrderRequest request) {
         User user = findUser(email);
@@ -157,6 +187,7 @@ public class OrderService {
         List<OrderResponse.OrderItemResponse> items = order.getItems() == null ? List.of() :
                 order.getItems().stream().map(item -> new OrderResponse.OrderItemResponse(
                         item.getProduct().getId(),
+                        item.getProduct().getName(),
                         item.getVariantId(),
                         item.getQuantity(),
                         item.getPrice()
@@ -183,7 +214,9 @@ public class OrderService {
                 addr,
                 order.getShippingMethod(),
                 order.getPaymentMethod(),
-                order.getShippingFee()
+                order.getShippingFee(),
+                order.getUser().getName(),
+                order.getUser().getEmail()
         );
     }
 }

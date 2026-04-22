@@ -1,14 +1,21 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { nonEmployeeGuard } from './core/guards/non-employee.guard';
+import { ProductManagementComponent } from './features/employee/product-management/product-management.component';
+import { ProductFormComponent } from './features/employee/product-form/product-form.component';
+import { CategoryManagementComponent } from './features/employee/category-management/category-management.component';
 
 export const routes: Routes = [
   {
     path: '',
+    canActivate: [nonEmployeeGuard],
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
   },
 
   {
     path: 'products',
+    canActivate: [nonEmployeeGuard],
     children: [
       {
         path: '',
@@ -23,12 +30,13 @@ export const routes: Routes = [
 
   {
     path: 'cart',
+    canActivate: [nonEmployeeGuard],
     loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent)
   },
 
   {
     path: 'checkout',
-    canActivate: [authGuard],
+    canActivate: [authGuard, nonEmployeeGuard],
     loadComponent: () => import('./features/cart/checkout/checkout.component').then(m => m.CheckoutComponent)
   },
 
@@ -70,29 +78,71 @@ export const routes: Routes = [
       },
       {
         path: 'addresses',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/addresses/addresses.component').then(m => m.AddressesComponent)
       },
       {
         path: 'orders',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/orders/orders.component').then(m => m.OrdersComponent)
       },
       {
         path: 'orders/:id',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
       },
       {
         path: 'returns',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/returns/returns.component').then(m => m.ReturnsComponent)
       },
       {
         path: 'reviews',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/reviews/reviews.component').then(m => m.ReviewsComponent)
       },
       {
         path: 'wishlist',
+        canActivate: [nonEmployeeGuard],
         loadComponent: () => import('./features/account/wishlist/wishlist.component').then(m => m.WishlistComponent)
       },
       { path: '', redirectTo: 'orders', pathMatch: 'full' }
+    ]
+  },
+
+  {
+    path: 'employee',
+    canActivate: [roleGuard],
+    data: { role: 'pracownik' },
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/employee/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent)
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./features/employee/order-list/order-list.component').then(m => m.OrderListComponent)
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () => import('./features/employee/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
+      },
+      {
+        path: 'products',
+        component: ProductManagementComponent
+      },
+      {
+        path: 'products/new',
+        component: ProductFormComponent
+      },
+      {
+        path: 'products/edit/:id',
+        component: ProductFormComponent
+      },
+      {
+        path: 'categories',
+        component: CategoryManagementComponent
+      }
     ]
   },
 

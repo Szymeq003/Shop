@@ -25,44 +25,7 @@ import { UiService } from '../../../core/services/ui.service';
       </div>
     }
   `,
-  styles: [`
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      z-index: 10000;
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.2s ease-out;
-    }
-    .modal-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 32px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-icon {
-      width: 64px; height: 64px;
-      background: rgba(var(--error-rgb), 0.1);
-      color: var(--error);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-    }
-    .modal-icon svg { width: 32px; height: 32px; }
-    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
-    .modal-message { color: var(--text-muted); line-height: 1.6; margin-bottom: 32px; }
-    .modal-actions { display: flex; gap: 12px; }
-    .modal-actions button { flex: 1; height: 48px; border-radius: 12px; font-weight: 600; font-size: 15px; }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  `]
 })
 export class ConfirmModalComponent {
   ui = inject(UiService);

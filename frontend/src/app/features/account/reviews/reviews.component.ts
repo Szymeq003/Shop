@@ -58,39 +58,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       </div>
     </div>
   `,
-  styles: [`
-    .reviews-container { display: flex; flex-direction: column; gap: 20px; }
-    .review-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      transition: all 0.2s;
-    }
-    .review-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-    .rating-info { display: flex; flex-direction: column; gap: 4px; }
-    .date { font-size: 13px; color: var(--text-muted); }
-    .delete-btn {
-      background: none; border: none; font-size: 18px; cursor: pointer;
-      opacity: 0.5; transition: opacity 0.2s; padding: 8px;
-    }
-    .delete-btn:hover { opacity: 1; color: var(--error); }
-    .comment { line-height: 1.6; color: var(--text); }
 
-    .loading-state { display: flex; justify-content: center; padding: 40px; }
-    .spinner {
-      width: 40px; height: 40px; border: 3px solid rgba(var(--primary-rgb), 0.1);
-      border-top-color: var(--primary); border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  `]
 })
 export class ReviewsComponent implements OnInit {
   private reviewService = inject(ReviewService);

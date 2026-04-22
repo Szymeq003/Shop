@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -14,11 +14,10 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, FormsModule, ProductCardComponent, FilterSidebarComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="products-page">
       <div class="container">
-
-        <!-- ── Page Header ── -->
         <div class="page-header">
           <div class="header-top">
             <h1 class="page-title">Katalog produktów</h1>
@@ -80,7 +79,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
           </div>
         </div>
 
-        <!-- ── Category Navigation Bar ── -->
         <div class="category-nav" *ngIf="categories().length > 0">
           <div class="cat-main-row">
             <button
@@ -110,7 +108,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
             </div>
           </div>
 
-          <!-- Subcategory row -->
           <div
             class="cat-sub-row"
             *ngIf="hoveredMainCategory && hoveredMainCategory.children && hoveredMainCategory.children.length > 0"
@@ -131,7 +128,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
           </div>
         </div>
 
-        <!-- ── Active filter chips ── -->
         <div class="active-chips-bar" *ngIf="hasActiveFilters()">
           <span class="chip" *ngIf="searchQuery">
             <svg viewBox="0 0 24 24" width="11" height="11"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/></svg>
@@ -162,7 +158,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
           </button>
         </div>
 
-        <!-- ── Main layout ── -->
         <div class="layout">
           <div class="sidebar-backdrop" *ngIf="showMobileFilters" (click)="showMobileFilters = false"></div>
 
@@ -181,7 +176,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
           </aside>
 
           <main class="content">
-            <!-- Skeleton -->
             <div *ngIf="isLoading()" class="skeleton-grid" [class.skeleton-list]="viewMode === 'list'">
               <div class="skeleton-card" *ngFor="let i of skeletonItems">
                 <div class="sk-img shimmer"></div>
@@ -194,7 +188,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
               </div>
             </div>
 
-            <!-- Empty -->
             <div *ngIf="!isLoading() && products().length === 0" class="empty-state">
               <div class="empty-icon">🔍</div>
               <h3>Brak wyników</h3>
@@ -204,7 +197,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
               </button>
             </div>
 
-            <!-- Grid / List -->
             <div
               *ngIf="!isLoading() && products().length > 0"
               class="product-grid"
@@ -218,7 +210,6 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
               ></app-product-card>
             </div>
 
-            <!-- Pagination -->
             <div *ngIf="!isLoading() && totalPages() > 1" class="pagination">
               <button class="page-btn nav-btn" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
@@ -237,489 +228,9 @@ import { FilterSidebarComponent } from '../filter-sidebar/filter-sidebar.compone
             </div>
           </main>
         </div>
-
       </div>
     </div>
   `,
-  styles: [`
-    .products-page {
-      min-height: 100vh;
-      padding: 36px 0 80px;
-      background: radial-gradient(ellipse at 20% 0%, rgba(108,99,255,0.07) 0%, transparent 60%);
-    }
-
-    /* ── Header ── */
-    .page-header { margin-bottom: 24px; }
-    .header-top { margin-bottom: 18px; }
-
-    .page-title {
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, var(--text) 60%, var(--primary-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
-    }
-
-    .results-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .results-count { font-weight: 700; color: var(--primary-light); font-size: 15px; }
-
-    .filter-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: var(--primary-light);
-      background: rgba(108,99,255,0.12);
-      padding: 2px 8px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    /* ── Toolbar ── */
-    .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-    .search-wrapper {
-      position: relative;
-      flex: 1;
-      min-width: 200px;
-      max-width: 440px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-
-    .search-input {
-      width: 100%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 11px 40px 11px 40px;
-      color: var(--text);
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      transition: all 0.25s;
-    }
-
-    .search-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
-      background: rgba(255,255,255,0.07);
-    }
-
-    .search-input::placeholder { color: var(--text-muted); }
-
-    .search-clear {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: var(--text-muted);
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .search-clear:hover { background: rgba(255,255,255,0.18); color: var(--text); }
-
-    .sort-wrapper { position: relative; flex-shrink: 0; }
-
-    .sort-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-
-    .sort-select {
-      appearance: none;
-      -webkit-appearance: none;
-      background: var(--card);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239090b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 11px 36px 11px 36px;
-      color: var(--text);
-      font-size: 14px;
-      font-family: inherit;
-      min-width: 195px;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.25s;
-    }
-    .sort-select:focus, .sort-select:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
-    .sort-select option { background: #16213e; color: var(--text); }
-
-    /* View toggle */
-    .view-toggle { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
-    .view-btn { background: none; border: none; color: var(--text-muted); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-    .view-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .view-btn.active { color: var(--primary-light); background: rgba(108,99,255,0.15); }
-
-    /* Mobile filter btn */
-    .mobile-filter-btn {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 16px;
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .mobile-filter-btn:hover { border-color: var(--primary); }
-
-    .filter-count-badge {
-      background: var(--primary);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: -5px;
-      right: -5px;
-    }
-
-    /* ══ Category Navigation ══ */
-    .category-nav {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    .cat-main-row {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 8px 10px;
-    }
-    .cat-main-row::-webkit-scrollbar { display: none; }
-
-    .cat-btn-wrap { flex-shrink: 0; }
-
-    .cat-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: none;
-      border: 1px solid transparent;
-      border-radius: 100px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      font-family: inherit;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-
-    .cat-btn:hover {
-      background: rgba(108,99,255,0.1);
-      border-color: rgba(108,99,255,0.2);
-      color: var(--primary-light);
-    }
-
-    .cat-btn.active {
-      background: rgba(108,99,255,0.15);
-      border-color: rgba(108,99,255,0.35);
-      color: var(--primary-light);
-      font-weight: 600;
-    }
-
-    .cat-chevron {
-      color: var(--text-muted);
-      transition: transform 0.2s;
-      opacity: 0.7;
-    }
-
-    .cat-btn-wrap:hover .cat-chevron { transform: rotate(180deg); color: var(--primary-light); }
-
-    /* Subcategory row */
-    .cat-sub-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px 10px;
-      border-top: 1px solid var(--border);
-      background: rgba(108,99,255,0.04);
-      overflow-x: auto;
-      scrollbar-width: none;
-      animation: subRowIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .cat-sub-row::-webkit-scrollbar { display: none; }
-
-    @keyframes subRowIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .sub-row-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      padding-right: 4px;
-      border-right: 1px solid var(--border);
-      margin-right: 4px;
-    }
-
-    .cat-sub-btn {
-      display: inline-flex;
-      align-items: center;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 5px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      font-family: inherit;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-
-    .cat-sub-btn:hover {
-      background: rgba(108,99,255,0.15);
-      border-color: rgba(108,99,255,0.35);
-      color: var(--primary-light);
-    }
-
-    .cat-sub-btn.active {
-      background: rgba(108,99,255,0.18);
-      border-color: var(--primary);
-      color: var(--primary-light);
-      font-weight: 600;
-    }
-
-    /* ── Active filter chips ── */
-    .active-chips-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 10px 14px;
-      background: rgba(108,99,255,0.05);
-      border: 1px solid rgba(108,99,255,0.12);
-      border-radius: 14px;
-      animation: fadeSlideIn 0.25s ease;
-    }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(108,99,255,0.15);
-      border: 1px solid rgba(108,99,255,0.3);
-      color: var(--primary-light);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 5px 10px;
-      border-radius: 100px;
-    }
-
-    .chip-x {
-      background: none;
-      border: none;
-      color: rgba(139,133,255,0.7);
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1;
-      padding: 0;
-      transition: color 0.2s;
-      display: flex;
-      align-items: center;
-    }
-    .chip-x:hover { color: #ef4444; }
-
-    .chip-clear {
-      background: rgba(239,68,68,0.1);
-      border-color: rgba(239,68,68,0.2);
-      color: #ef4444;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .chip-clear:hover { background: rgba(239,68,68,0.2); }
-
-    /* ── Layout ── */
-    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: start; }
-    .sidebar { position: relative; }
-
-    /* ── Skeleton ── */
-    @keyframes shimmer {
-      0%   { background-position: -400px 0; }
-      100% { background-position: 400px 0; }
-    }
-
-    .shimmer {
-      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 75%);
-      background-size: 800px 100%;
-      animation: shimmer 1.6s infinite linear;
-    }
-
-    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .skeleton-list .skeleton-card { display: flex; height: 120px; }
-    .skeleton-list .sk-img { width: 120px !important; height: 100% !important; flex-shrink: 0; border-radius: 12px 0 0 12px !important; }
-
-    .skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-    .sk-img { width: 100%; padding-top: 75%; border-radius: 0; }
-    .sk-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .sk-line { height: 12px; border-radius: 6px; }
-    .sk-short { width: 45%; }
-    .sk-medium { width: 70%; }
-    .sk-price { height: 18px; width: 55%; border-radius: 6px; margin-top: 4px; }
-
-    /* ── Empty state ── */
-    .empty-state { text-align: center; padding: 80px 24px; color: var(--text-muted); }
-    .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
-    .empty-state h3 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-    .empty-state p { font-size: 14px; line-height: 1.7; }
-
-    /* ── Product Grid ── */
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
-    .product-grid.list-view { grid-template-columns: 1fr; gap: 12px; }
-
-    /* ── Pagination ── */
-    .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 48px; flex-wrap: wrap; }
-
-    .page-btn {
-      min-width: 38px;
-      height: 38px;
-      padding: 0 10px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-light); background: rgba(108,99,255,0.08); }
-    .page-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(108,99,255,0.4); }
-    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .page-ellipsis { color: var(--text-muted); font-size: 16px; padding: 0 4px; }
-    .page-info { margin-left: 12px; font-size: 12px; color: var(--text-muted); }
-
-    /* ── Mobile sidebar drawer ── */
-    .sidebar-backdrop { display: none; }
-
-    /* ── Responsive ── */
-    @media (max-width: 1024px) {
-      .layout { grid-template-columns: 230px 1fr; gap: 18px; }
-    }
-
-    @media (max-width: 860px) {
-      .mobile-filter-btn { display: flex; }
-      .layout { grid-template-columns: 1fr; }
-      .sidebar {
-        display: none;
-        position: fixed;
-        inset: 0 0 0 auto;
-        width: 300px;
-        z-index: 500;
-        overflow-y: auto;
-        box-shadow: -8px 0 40px rgba(0,0,0,0.5);
-      }
-      .sidebar.mobile-open { display: block; animation: slideInRight 0.3s ease; }
-      @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-      .sidebar-backdrop {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.6);
-        z-index: 499;
-        backdrop-filter: blur(3px);
-      }
-
-      .mobile-sidebar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        background: var(--surface-2);
-        border-bottom: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-      .mobile-sidebar-header span { font-size: 15px; font-weight: 700; color: var(--text); }
-      .mobile-sidebar-header button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; display: flex; transition: color 0.2s; }
-      .mobile-sidebar-header button:hover { color: var(--text); }
-
-      .skeleton-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-      .search-wrapper { max-width: 100%; }
-      .toolbar { gap: 8px; }
-    }
-
-    @media (max-width: 560px) {
-      .page-title { font-size: 24px; }
-      .sort-select { min-width: unset; }
-      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    }
-  `]
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
@@ -818,7 +329,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return this.wishlistService.isInWishlist(productId);
   }
 
-  /* ── Category nav ── */
   setHovered(id: number) {
     clearTimeout(this.hoverTimer);
     this.hoveredCategoryId = id;
@@ -857,7 +367,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return 'Kategoria';
   }
 
-  /* ── Filters ── */
   onFilterChange(filters: any) {
     const categoryId = this.currentFilters.categoryId;
     this.currentFilters = { ...filters, ...(categoryId ? { categoryId } : {}) };
@@ -907,3 +416,4 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   trackByProductId(_: number, product: Product): number { return product.id; }
 }
+

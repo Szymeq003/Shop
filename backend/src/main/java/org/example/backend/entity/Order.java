@@ -71,6 +71,6 @@ public class Order {
     }
 
     public enum Status {
-        nowe, oplacone, wyslane, anulowane
+        nowe, oplacone, pakowane, wyslane, dostarczone, anulowane
     }
 }
