@@ -2149,6 +2149,10 @@ app-product-detail .availability.out-of-stock {
   color: var(--error);
 }
 
+app-product-detail .availability.low-stock {
+  color: var(--warning);
+}
+
 app-product-detail .stock-count {
   font-size: 13px;
   opacity: 0.8;

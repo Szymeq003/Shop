@@ -23,4 +23,5 @@ public class ProductDTO {
     private Double averageRating;
     private Integer reviewCount;
     private String status;
+    private Integer totalStock;
 }

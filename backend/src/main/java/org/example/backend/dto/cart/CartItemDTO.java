@@ -23,4 +23,5 @@ public class CartItemDTO {
     private Integer quantity;
     private BigDecimal subtotal;
     private Map<String, String> attributes;
+    private Integer stockQuantity;
 }

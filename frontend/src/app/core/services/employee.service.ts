@@ -62,6 +62,7 @@ export interface ProductResponse {
   categoryName: string;
   mainImageUrl: string;
   status: string;
+  totalStock: number;
 }
 
 export interface CategoryResponse {

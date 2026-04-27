@@ -225,6 +225,10 @@ public class ProductService {
     }
 
     private ProductDTO convertToDTO(Product product) {
+        int totalStock = product.getVariants().stream()
+                .mapToInt(ProductVariant::getStockQuantity)
+                .sum();
+
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -236,6 +240,7 @@ public class ProductService {
                 .averageRating(product.getAverageRating())
                 .reviewCount(product.getReviewCount())
                 .status(product.getStatus() != null ? product.getStatus().name() : null)
+                .totalStock(totalStock)
                 .build();
     }
 

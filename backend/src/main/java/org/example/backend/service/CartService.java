@@ -42,9 +42,16 @@ public class CartService {
 
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + request.getQuantity());
+            int newQuantity = item.getQuantity() + request.getQuantity();
+            if (newQuantity > variant.getStockQuantity()) {
+                throw new IllegalArgumentException("Niewystarczająca ilość produktu w magazynie. Dostępna ilość: " + variant.getStockQuantity());
+            }
+            item.setQuantity(newQuantity);
             cartItemRepository.save(item);
         } else {
+            if (request.getQuantity() > variant.getStockQuantity()) {
+                throw new IllegalArgumentException("Niewystarczająca ilość produktu w magazynie. Dostępna ilość: " + variant.getStockQuantity());
+            }
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .variant(variant)
@@ -70,6 +77,9 @@ public class CartService {
             cartItemRepository.delete(item);
             item.getCart().getItems().remove(item);
         } else {
+            if (quantity > item.getVariant().getStockQuantity()) {
+                throw new IllegalArgumentException("Niewystarczająca ilość produktu w magazynie. Dostępna ilość: " + item.getVariant().getStockQuantity());
+            }
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }
@@ -159,6 +169,7 @@ public class CartService {
                 .quantity(item.getQuantity())
                 .subtotal(subtotal)
                 .attributes(attributes)
+                .stockQuantity(variant.getStockQuantity())
                 .build();
     }
 }

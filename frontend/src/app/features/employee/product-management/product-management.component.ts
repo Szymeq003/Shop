@@ -39,6 +39,7 @@ import { EmployeeService, ProductResponse } from '../../../core/services/employe
                 <th>Produkt</th>
                 <th>Kategoria</th>
                 <th>Cena</th>
+                <th>Stan</th>
                 <th>Status</th>
                 <th>Akcje</th>
               </tr>
@@ -63,6 +64,14 @@ import { EmployeeService, ProductResponse } from '../../../core/services/employe
                   <span class="price-text">{{ product.price | currency:'PLN' }}</span>
                 </td>
                 <td>
+                  <span class="badge" 
+                        [class.badge-paid]="product.totalStock > 5" 
+                        [class.badge-pending]="product.totalStock > 0 && product.totalStock <= 5"
+                        [class.badge-anulowane]="product.totalStock === 0">
+                    {{ product.totalStock }} szt.
+                  </span>
+                </td>
+                <td>
                   <span class="badge" [class.badge-paid]="product.status === 'AKTYWNY'" [class.badge-anulowane]="product.status === 'UKRYTY'">
                     {{ product.status === 'AKTYWNY' ? 'Aktywny' : 'Ukryty' }}
                   </span>
@@ -81,7 +90,7 @@ import { EmployeeService, ProductResponse } from '../../../core/services/employe
 
               <!-- Loading state -->
               <tr *ngIf="isLoading()">
-                <td colspan="5">
+                <td colspan="6">
                   <div class="loading-state">
                     <div class="spinner-purple"></div>
                     <p>Ładowanie produktów...</p>
@@ -91,7 +100,7 @@ import { EmployeeService, ProductResponse } from '../../../core/services/employe
 
               <!-- Empty state -->
               <tr *ngIf="!isLoading() && products().length === 0">
-                <td colspan="5" class="empty-row">
+                <td colspan="6" class="empty-row">
                   <div class="empty-state">
                     <div class="icon">📦</div>
                     <p>Brak produktów w bazie. Dodaj swój pierwszy produkt!</p>

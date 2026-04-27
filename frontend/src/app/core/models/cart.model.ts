@@ -15,6 +15,7 @@ export interface CartItem {
   quantity: number;
   subtotal: number;
   attributes: { [key: string]: string };
+  stockQuantity: number;
 }
 
 export interface AddToCartRequest {

@@ -11,6 +11,7 @@ export interface Product {
   defaultVariantId: number;
   averageRating: number;
   reviewCount: number;
+  totalStock?: number;
 }
 
 export interface ProductDetail extends Product {

@@ -42,8 +42,10 @@ import { UiService } from '../../core/services/ui.service';
                 
                 <div class="quantity-controls">
                   <button (click)="updateQuantity(item, -1)">-</button>
-                  <span>{{ item.quantity }}</span>
-                  <button (click)="updateQuantity(item, 1)">+</button>
+                  <span [class.text-warning]="item.quantity >= item.stockQuantity" [title]="item.quantity >= item.stockQuantity ? 'Maksymalna dostępna ilość' : ''">
+                    {{ item.quantity }}
+                  </span>
+                  <button (click)="updateQuantity(item, 1)" [disabled]="item.quantity >= item.stockQuantity" [title]="item.quantity >= item.stockQuantity ? 'Brak więcej na magazynie' : ''">+</button>
                 </div>
 
                 <div class="subtotal">{{ item.subtotal | currency:'PLN':'symbol':'1.2-2' }}</div>
@@ -141,7 +143,12 @@ export class CartComponent {
   discountError = '';
 
   updateQuantity(item: CartItem, delta: number) {
-    this.cartService.updateQuantity(item.variantId, item.quantity + delta, item.id).subscribe();
+    this.cartService.updateQuantity(item.variantId, item.quantity + delta, item.id).subscribe({
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Nie można zmienić ilości (brak na magazynie?)';
+        this.ui.showToast(errorMsg, 'error');
+      }
+    });
   }
 
   async removeItem(item: CartItem) {

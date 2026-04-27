@@ -91,9 +91,9 @@ import { StarRatingComponent } from '../../../shared/components/star-rating/star
                 {{ (selectedVariant()?.price || product()?.price) | currency:'PLN':'symbol':'1.2-2' }}
               </div>
             </div>
-            <div class="availability" [class.out-of-stock]="isOutOfStock()">
+            <div class="availability" [ngClass]="getAvailabilityClass()">
               <span class="dot"></span> 
-              {{ isOutOfStock() ? 'Brak w magazynie' : 'Dostępny w magazynie' }}
+              {{ getAvailabilityText() }}
               <span class="stock-count" *ngIf="selectedVariant()">({{ selectedVariant()?.stockQuantity }} szt.)</span>
             </div>
           </div>
@@ -383,6 +383,20 @@ export class ProductDetailComponent implements OnInit {
     return false; // Assuming base product stock is handled by variants
   }
 
+  getAvailabilityClass(): string {
+    if (this.isOutOfStock()) return 'out-of-stock';
+    const sq = this.selectedVariant()?.stockQuantity || 0;
+    if (sq > 0 && sq <= 5) return 'low-stock';
+    return 'in-stock';
+  }
+
+  getAvailabilityText(): string {
+    if (this.isOutOfStock()) return 'Brak w magazynie';
+    const sq = this.selectedVariant()?.stockQuantity || 0;
+    if (sq > 0 && sq <= 5) return 'Ostatnie sztuki';
+    return 'Dostępny w magazynie';
+  }
+
   changeQuantity(delta: number) {
     this.quantity = Math.max(1, this.quantity + delta);
     if (this.selectedVariant() && this.quantity > this.selectedVariant()!.stockQuantity) {
@@ -414,11 +428,18 @@ export class ProductDetailComponent implements OnInit {
       price: variant.price || p.price,
       quantity: this.quantity,
       subtotal: (variant.price || p.price) * this.quantity,
-      attributes: variant.attributeValues
+      attributes: variant.attributeValues,
+      stockQuantity: variant.stockQuantity
     };
 
-    this.cartService.addToCart(cartItem).subscribe(() => {
-      this.ui.showToast('Dodano do koszyka!');
+    this.cartService.addToCart(cartItem).subscribe({
+      next: () => {
+        this.ui.showToast('Dodano do koszyka!');
+      },
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Nie można dodać produktu (brak wystarczającej ilości w magazynie?)';
+        this.ui.showToast(errorMsg, 'error');
+      }
     });
   }
 }

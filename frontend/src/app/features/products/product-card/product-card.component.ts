@@ -107,7 +107,8 @@ export class ProductCardComponent {
       price: this.product.price,
       quantity: 1,
       subtotal: this.product.price,
-      attributes: {}
+      attributes: {},
+      stockQuantity: this.product.totalStock || 1
     };
     this.cartService.addToCart(cartItem).subscribe(() => {
       this.ui.showToast('Dodano do koszyka!');
