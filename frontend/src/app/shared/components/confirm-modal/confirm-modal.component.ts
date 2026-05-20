@@ -19,7 +19,7 @@ import { UiService } from '../../../core/services/ui.service';
           <p class="modal-message">{{ state.message }}</p>
           <div class="modal-actions">
             <button class="btn btn-secondary" (click)="ui.resolveConfirm(false)">Anuluj</button>
-            <button class="btn btn-danger" (click)="ui.resolveConfirm(true)">Tak, usuń</button>
+            <button class="btn btn-danger" (click)="ui.resolveConfirm(true)">Tak</button>
           </div>
         </div>
       </div>

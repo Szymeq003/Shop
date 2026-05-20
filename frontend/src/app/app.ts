@@ -16,7 +16,7 @@ import { AuthService } from './core/services/auth.service';
     <div style="min-height: calc(100vh - 70px);">
       <router-outlet />
     </div>
-    @if (auth.currentUser()?.role !== 'pracownik') {
+    @if (auth.currentUser()?.role !== 'pracownik' && auth.currentUser()?.role !== 'admin') {
       <app-newsletter />
     }
     <app-toast />

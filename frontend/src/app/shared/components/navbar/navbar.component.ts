@@ -10,7 +10,7 @@ import { CartService } from '../../../core/services/cart.service';
   template: `
     <nav class="navbar">
       <div class="container navbar-inner">
-        <a [routerLink]="auth.currentUser()?.role === 'pracownik' ? '/employee' : '/'" class="brand" (click)="isMenuOpen.set(false)">
+        <a [routerLink]="auth.currentUser()?.role === 'pracownik' ? '/employee' : (auth.currentUser()?.role === 'admin' ? '/admin/dashboard' : '/')" class="brand" (click)="isMenuOpen.set(false)">
           <img src="favicon.ico" alt="TechPulse Logo" class="logo-img">
           TechPulse
         </a>
@@ -23,11 +23,11 @@ import { CartService } from '../../../core/services/cart.service';
 
         <div class="nav-links-wrapper" [class.open]="isMenuOpen()">
           <div class="nav-links">
-            @if (auth.currentUser()?.role !== 'pracownik') {
+            @if (auth.currentUser()?.role !== 'pracownik' && auth.currentUser()?.role !== 'admin') {
               <a routerLink="/products" routerLinkActive="active" (click)="isMenuOpen.set(false)">Produkty</a>
             }
             
-            @if (auth.currentUser()?.role !== 'pracownik') {
+            @if (auth.currentUser()?.role !== 'pracownik' && auth.currentUser()?.role !== 'admin') {
               <a routerLink="/cart" class="cart-link" (click)="isMenuOpen.set(false)">
                 <div class="cart-icon-wrapper">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cart-icon">
@@ -44,11 +44,13 @@ import { CartService } from '../../../core/services/cart.service';
             }
 
             @if (auth.isLoggedIn()) {
-              @if (auth.currentUser()?.role === 'pracownik' || auth.currentUser()?.role === 'admin') {
+              @if (auth.currentUser()?.role === 'admin') {
+                <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="isMenuOpen.set(false)">Panel Admina</a>
+              } @else if (auth.currentUser()?.role === 'pracownik') {
                 <a routerLink="/employee" routerLinkActive="active" (click)="isMenuOpen.set(false)">Panel Pracownika</a>
               }
-              <a [routerLink]="auth.currentUser()?.role === 'pracownik' ? '/account/profile' : '/account/orders'" routerLinkActive="active" (click)="isMenuOpen.set(false)">
-                {{ auth.currentUser()?.role === 'pracownik' ? 'Zmień hasło' : 'Moje konto' }}
+              <a [routerLink]="(auth.currentUser()?.role === 'pracownik' || auth.currentUser()?.role === 'admin') ? '/account/profile' : '/account/orders'" routerLinkActive="active" (click)="isMenuOpen.set(false)">
+                {{ (auth.currentUser()?.role === 'pracownik' || auth.currentUser()?.role === 'admin') ? 'Zmień hasło' : 'Moje konto' }}
               </a>
               <button class="btn btn-secondary btn-sm" (click)="auth.logout(); isMenuOpen.set(false)">Wyloguj</button>
             } @else {

@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="account-layout">
         <aside class="account-nav">
           <h3 style="margin-bottom: 20px; font-size: 16px; padding: 0 14px;">Cześć {{ profileData().name.split(' ')[0] }}</h3>
-          @if (authService.currentUser()?.role !== 'pracownik') {
+          @if (authService.currentUser()?.role !== 'pracownik' && authService.currentUser()?.role !== 'admin') {
             <a routerLink="/account/orders" routerLinkActive="active">Zamówienia</a>
             <a routerLink="/account/returns" routerLinkActive="active">Zwroty</a>
             <a routerLink="/account/wishlist" routerLinkActive="active">Obserwowane</a>
@@ -31,7 +31,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           <!-- Dane osobowe -->
-          @if (authService.currentUser()?.role !== 'pracownik') {
+          @if (authService.currentUser()?.role !== 'pracownik' && authService.currentUser()?.role !== 'admin') {
             <section class="card" style="margin-bottom: 32px;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
                 <h3 style="font-size: 18px; margin: 0;">Dane podstawowe</h3>

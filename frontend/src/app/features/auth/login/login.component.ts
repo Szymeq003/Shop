@@ -116,6 +116,8 @@ export class LoginComponent {
       next: (res) => {
         if (res.role === 'pracownik') {
           this.router.navigate(['/employee']);
+        } else if (res.role === 'admin') {
+          this.router.navigate(['/admin/dashboard']);
         } else {
           this.router.navigate(['/account/orders']);
         }
