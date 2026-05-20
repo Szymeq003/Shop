@@ -21,6 +21,561 @@
   --transition: 0.2s ease;
 }
 
+body.light-theme {
+  --surface: #f4f5f7;
+  --surface-2: #ffffff;
+  --surface-3: #e4e6eb;
+  --card: #ffffff;
+  --card-hover: #f1f3f5;
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  --primary-light: #7c3aed;
+  --error: #e03131;
+  --success: #2b8a3e;
+  --warning: #d9480f;
+}
+
+body.light-theme td {
+  border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-theme input[type="text"]:not(.newsletter-input),
+body.light-theme input[type="email"]:not(.newsletter-input),
+body.light-theme input[type="password"]:not(.newsletter-input),
+body.light-theme input[type="number"]:not(.newsletter-input),
+body.light-theme input:not([type]):not(.newsletter-input),
+body.light-theme select,
+body.light-theme textarea {
+  background: var(--surface-3) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-navbar .btn-secondary {
+  color: #e8e8f0 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.light-theme app-navbar .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--primary) !important;
+}
+
+body.light-theme app-navbar .nav-links-wrapper {
+  background: #11111d !important;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme app-navbar .burger span {
+  background-color: #ffffff !important;
+}
+
+body.light-theme app-product-card .image-wrapper {
+  background: linear-gradient(135deg, #f1f3f5 0%, #e9ecef 100%) !important;
+}
+
+body.light-theme app-product-card .product-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme app-product-list .products-page {
+  background: var(--surface) !important;
+}
+
+body.light-theme app-product-list .search-input:focus {
+  background: var(--card) !important;
+}
+
+body.light-theme app-product-list .search-clear {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-list .search-clear:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-list .view-btn:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-list .category-nav {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme app-product-list .cat-btn:hover {
+  color: var(--text) !important;
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+body.light-theme app-product-list .cat-sub-row {
+  border-top-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-theme app-product-list .sub-row-label {
+  border-right-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme app-product-list .cat-sub-btn {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-list .cat-sub-btn:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: var(--primary) !important;
+}
+
+body.light-theme app-product-list .cat-sub-btn.active {
+  background: rgba(139, 92, 246, 0.1) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+body.light-theme app-filter-sidebar .quick-btn {
+  background: var(--surface-3) !important;
+}
+
+body.light-theme app-filter-sidebar .star {
+  color: #e5e7eb !important;
+}
+
+body.light-theme app-filter-sidebar .rating-btn:hover {
+  background: var(--card-hover) !important;
+}
+
+body.light-theme app-filter-sidebar .checkmark {
+  background: var(--surface-3) !important;
+}
+
+body.light-theme app-star-rating .star.filled {
+  color: #f59e0b !important;
+}
+
+body.light-theme app-product-card .star {
+  color: #cbd5e1 !important;
+}
+
+body.light-theme app-product-card .star.filled {
+  color: #d97706 !important;
+}
+
+body.light-theme app-filter-sidebar .star.filled {
+  color: #d97706 !important;
+}
+
+body.light-theme select option {
+  background: var(--card) !important;
+  color: var(--text) !important;
+}
+
+/* Employee panels overrides */
+body.light-theme app-category-management .page-title,
+body.light-theme app-product-management .page-title,
+body.light-theme app-product-form .page-title,
+body.light-theme app-order-list .page-title,
+body.light-theme app-order-detail .page-title {
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-management .page-subtitle,
+body.light-theme app-product-form .page-subtitle,
+body.light-theme app-order-list .page-subtitle,
+body.light-theme app-order-detail .page-subtitle {
+  color: var(--text-muted) !important;
+}
+
+/* Category Management */
+body.light-theme app-category-management .category-card {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-category-management .category-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme app-category-management .cat-desc {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-category-management .subcategories-section {
+  border-top-color: var(--border) !important;
+}
+
+body.light-theme app-category-management .sub-item {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+}
+
+body.light-theme app-category-management .sub-item:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+body.light-theme app-category-management .sub-name {
+  color: var(--text) !important;
+}
+
+body.light-theme app-category-management .modal {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme app-category-management .modal-header {
+  background: var(--surface-3) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+body.light-theme app-category-management .modal-header h2 {
+  color: var(--text) !important;
+}
+
+body.light-theme app-category-management .modal-body {
+  color: var(--text) !important;
+}
+
+body.light-theme app-category-management .form-group label {
+  color: var(--text) !important;
+}
+
+body.light-theme app-category-management .form-input,
+body.light-theme app-category-management .form-textarea,
+body.light-theme app-category-management .form-select {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-category-management .form-input:focus,
+body.light-theme app-category-management .form-textarea:focus,
+body.light-theme app-category-management .form-select:focus {
+  background: var(--card) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Product Management */
+body.light-theme app-product-management .table-card {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-product-management th {
+  background: var(--surface-3) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-management td {
+  border-top-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-management tr:hover td {
+  background: var(--card-hover) !important;
+}
+
+body.light-theme app-product-management .product-sku {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-management .product-name {
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-management .category-tag {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: var(--primary) !important;
+}
+
+body.light-theme app-product-management .pagination-bar {
+  border-top-color: var(--border) !important;
+}
+
+body.light-theme app-product-management .pagination-info {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-management .btn-page {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-management .btn-page:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: var(--primary) !important;
+}
+
+body.light-theme app-product-management .page-num {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-management .page-num:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: var(--primary) !important;
+}
+
+body.light-theme app-product-management .page-num.active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+}
+
+/* Product Form */
+body.light-theme app-product-form .form-section {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-product-form .section-title,
+body.light-theme app-product-form .sub-section-title {
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-form .form-group label {
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-form input,
+body.light-theme app-product-form textarea,
+body.light-theme app-product-form .form-select {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-form input:focus,
+body.light-theme app-product-form textarea:focus,
+body.light-theme app-product-form .form-select:focus {
+  background: var(--card) !important;
+  border-color: var(--accent) !important;
+}
+
+body.light-theme app-product-form .form-select option {
+  background: var(--card) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-form .variant-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+body.light-theme app-product-form .variant-number {
+  background: var(--surface-3) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-product-form .attributes-box {
+  border-top-color: var(--border) !important;
+}
+
+body.light-theme app-product-form .divider-text::before {
+  background: var(--border) !important;
+}
+
+body.light-theme app-product-form .divider-text span {
+  background: var(--card) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-product-form .btn-upload {
+  color: var(--primary) !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+body.light-theme app-product-form .btn-upload:hover {
+  background: rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Order List */
+body.light-theme app-order-list .filters-card {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-order-list .form-select {
+  background: var(--surface-3) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+body.light-theme app-order-list .form-select:focus,
+body.light-theme app-order-list .form-select:hover {
+  border-color: var(--primary) !important;
+  background: var(--card) !important;
+}
+
+body.light-theme app-order-list .filter-item label {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-list .table-card {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-order-list th {
+  background: var(--surface-3) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-list td {
+  border-top-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-list tr:hover td {
+  background: var(--card-hover) !important;
+}
+
+body.light-theme app-order-list .order-id {
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-list .customer-email {
+  color: var(--text-muted) !important;
+}
+
+/* Order Detail */
+body.light-theme app-order-detail .items-card,
+body.light-theme app-order-detail .action-card,
+body.light-theme app-order-detail .info-card,
+body.light-theme app-order-detail .error-card {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.light-theme app-order-detail .section-title {
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-detail .sidebar-title {
+  color: var(--text) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+body.light-theme app-order-detail .info-group label {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-detail .info-value {
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-detail .info-sub {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-detail .order-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+body.light-theme app-order-detail .item-name {
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-detail .item-sku {
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-detail .item-subtotal {
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-detail .order-summary {
+  border-top-color: var(--border) !important;
+}
+
+body.light-theme app-order-detail .summary-line {
+  border-top-color: var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+body.light-theme app-order-detail .summary-line.total {
+  border-top-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.light-theme app-order-detail .total-price {
+  color: var(--primary) !important;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 15px 35px rgba(245, 158, 11, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.theme-toggle-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+body.light-theme .theme-toggle-btn {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .theme-toggle-btn:hover {
+  box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+}
+
+.theme-toggle-btn.on-footer {
+  background: white !important;
+  color: #f59e0b !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  border-color: transparent !important;
+}
+
+.theme-toggle-btn.on-footer:hover {
+  background: #f8f9fa !important;
+  transform: translateY(-5px) scale(1.1) !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.light-theme .theme-toggle-btn.on-footer {
+  color: #6366f1 !important;
+}
+
 *,
 *::before,
 *::after {
@@ -64,20 +619,20 @@ a:hover {
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 32px;
   backdrop-filter: blur(20px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow);
 }
 
 .card:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card-hover);
   border-color: rgba(139, 92, 246, 0.3);
   transform: translateY(-4px);
-  box-shadow: 0 15px 45px rgba(139, 92, 246, 0.15);
+  box-shadow: var(--shadow);
 }
 
 .form-group {
@@ -1272,7 +1827,7 @@ app-product-list .sort-select:hover {
 }
 
 app-product-list .sort-select option {
-  background: #16213e;
+  background: var(--surface-2);
   color: var(--text);
 }
 
@@ -1384,7 +1939,7 @@ app-product-list .cat-btn {
   padding: 0 12px;
   font-size: 13px;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
@@ -2136,7 +2691,7 @@ app-product-detail .variant-card.active {
 app-product-detail .variant-name {
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: var(--text);
   display: block;
 }
 
@@ -5087,7 +5642,7 @@ app-cart .discount-input-group input {
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface-3);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;

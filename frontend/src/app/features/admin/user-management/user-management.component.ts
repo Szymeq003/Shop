@@ -187,7 +187,7 @@ import { UiService } from '../../../core/services/ui.service';
 
     .filter-search {
       width: 100%;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--surface-3);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
@@ -202,7 +202,7 @@ import { UiService } from '../../../core/services/ui.service';
     }
 
     .filter-select {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--surface-3);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
@@ -223,7 +223,7 @@ import { UiService } from '../../../core/services/ui.service';
     }
 
     .filter-select option {
-      background: #1e1e2e;
+      background: var(--surface-2);
       color: var(--text);
     }
 
@@ -284,7 +284,7 @@ import { UiService } from '../../../core/services/ui.service';
     .role-select {
       padding: 6px 28px 6px 10px;
       border-radius: 8px;
-      background: rgba(255,255,255,0.06);
+      background: var(--surface-3);
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 13px;
@@ -304,7 +304,7 @@ import { UiService } from '../../../core/services/ui.service';
     }
 
     .role-select option {
-      background: #1e1e2e;
+      background: var(--surface-2);
       color: var(--text);
       font-weight: 500;
     }
@@ -332,6 +332,33 @@ import { UiService } from '../../../core/services/ui.service';
       color: #51cf66;
       background: rgba(81, 207, 102, 0.08);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2351cf66' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    :host-context(body.light-theme) .role-admin {
+      color: #c92a2a;
+      border-color: rgba(201, 42, 42, 0.4);
+      background: rgba(201, 42, 42, 0.06);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23c92a2a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    :host-context(body.light-theme) .role-pracownik {
+      color: #5f3dc4;
+      border-color: rgba(95, 61, 196, 0.4);
+      background: rgba(95, 61, 196, 0.06);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235f3dc4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    :host-context(body.light-theme) .role-klient {
+      color: #2b8a3e;
+      border-color: rgba(43, 138, 62, 0.4);
+      background: rgba(43, 138, 62, 0.06);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%232b8a3e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 8px center;
     }
@@ -392,7 +419,7 @@ import { UiService } from '../../../core/services/ui.service';
 
     .modal-role-select {
       width: 100%;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--surface-3);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
@@ -401,6 +428,11 @@ import { UiService } from '../../../core/services/ui.service';
       padding: 12px 16px;
       outline: none;
       cursor: pointer;
+    }
+
+    .modal-role-select option {
+      background: var(--surface-2);
+      color: var(--text);
     }
 
     .modal-role-select:focus {

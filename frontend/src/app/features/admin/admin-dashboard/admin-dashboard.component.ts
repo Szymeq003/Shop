@@ -462,20 +462,21 @@ import { AdminService, AdminStatsResponse, DailySales } from '../../../core/serv
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
       display: flex;
       align-items: center;
       gap: 20px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
     }
 
     .stat-card:hover {
       transform: translateY(-5px);
       border-color: rgba(139, 92, 246, 0.3);
-      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.1);
+      box-shadow: var(--shadow);
     }
 
     .stat-icon-wrapper {
@@ -547,8 +548,8 @@ import { AdminService, AdminStatsResponse, DailySales } from '../../../core/serv
     }
 
     .mgmt-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
       display: flex;
@@ -557,12 +558,14 @@ import { AdminService, AdminStatsResponse, DailySales } from '../../../core/serv
       text-decoration: none;
       color: inherit;
       transition: all 0.3s ease;
+      box-shadow: var(--shadow);
     }
 
     .mgmt-card:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--card-hover);
       border-color: rgba(139, 92, 246, 0.25);
       transform: translateY(-3px);
+      box-shadow: var(--shadow);
     }
 
     .mgmt-icon {
@@ -820,7 +823,7 @@ import { AdminService, AdminStatsResponse, DailySales } from '../../../core/serv
       width: 100%;
       display: flex;
       align-items: flex-end;
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--surface-3);
       border-radius: 6px;
       overflow: visible;
       position: relative;
