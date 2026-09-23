@@ -1,83 +1,72 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { NewsletterMessage, NewsletterService } from '../../../core/services/newsletter.service';
 
 @Component({
   selector: 'app-newsletter',
   standalone: true,
-  imports: [RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="container page">
       <header class="page-header">
-        <a routerLink="/admin/dashboard" class="back-link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          Powrót do panelu
-        </a>
+        <a routerLink="/admin/dashboard" class="back-link">Powrót do panelu</a>
         <h1 class="page-title">Newsletter</h1>
-        <p class="page-subtitle">Zarządzaj subskrybentami i wysyłaj kampanie e-mailowe.</p>
       </header>
 
-      <div class="coming-soon-card">
-        <div class="coming-soon-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
-        </div>
-        <h2>Moduł w przygotowaniu</h2>
-        <p>Funkcjonalność newslettera jest w trakcie tworzenia. Wkrótce będzie dostępna.</p>
+      <div class="card">
+        <h3>Utwórz nową wiadomość</h3>
+        <form (ngSubmit)="add()">
+          <input type="text" [(ngModel)]="newItem.subject" name="subject" placeholder="Temat" required style="width: 100%; margin-bottom: 8px;">
+          <textarea [(ngModel)]="newItem.content" name="content" placeholder="Treść wiadomości..." required style="width: 100%; height: 100px; margin-bottom: 8px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 8px;"></textarea>
+          <button type="submit" class="btn btn-primary">Dodaj do kolejki</button>
+        </form>
+      </div>
+
+      <div class="card mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Temat</th>
+              <th>Status</th>
+              <th>Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of items">
+              <td>{{ item.id }}</td>
+              <td>{{ item.subject }}</td>
+              <td>{{ item.status }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" (click)="delete(item.id!)">Usuń</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `,
   styles: [`
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      margin-bottom: 16px;
-      transition: color 0.2s ease;
-    }
-    .back-link:hover { color: var(--primary-light); }
-    .back-link svg { width: 18px; height: 18px; }
-
-    .coming-soon-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 40px;
-      background: rgba(255,255,255,0.02);
-      border: 1px dashed rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      margin-top: 20px;
-    }
-    .coming-soon-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(81, 207, 102, 0.1);
-      color: #51cf66;
-      margin-bottom: 24px;
-    }
-    .coming-soon-icon svg { width: 36px; height: 36px; }
-    .coming-soon-card h2 {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-    .coming-soon-card p {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 400px;
-      line-height: 1.6;
-    }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; text-decoration: none; }
+    .card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .mt-4 { margin-top: 24px; }
+    input, select { padding: 8px; margin-right: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+    .btn-primary { background: var(--primary); }
+    .btn-danger { background: #ff4757; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
   `]
 })
-export class NewsletterComponent {}
+export class NewsletterComponent implements OnInit {
+  private service = inject(NewsletterService);
+  items: NewsletterMessage[] = [];
+  newItem: NewsletterMessage = { subject: '', content: '', status: 'DRAFT' };
+
+  ngOnInit() { this.load(); }
+  load() { this.service.getAllMessages().subscribe(d => this.items = d); }
+  add() { this.service.createMessage(this.newItem).subscribe(() => { this.load(); this.newItem = { subject: '', content: '', status: 'DRAFT' }; }); }
+  delete(id: number) { this.service.deleteMessage(id).subscribe(() => this.load()); }
+}

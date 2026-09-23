@@ -1,83 +1,79 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DiscountCode, DiscountCodeService } from '../../../core/services/discount-code.service';
 
 @Component({
   selector: 'app-discount-codes',
   standalone: true,
-  imports: [RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="container page">
       <header class="page-header">
-        <a routerLink="/admin/dashboard" class="back-link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          Powrót do panelu
-        </a>
+        <a routerLink="/admin/dashboard" class="back-link">Powrót do panelu</a>
         <h1 class="page-title">Kody Rabatowe</h1>
-        <p class="page-subtitle">Twórz i zarządzaj kodami rabatowymi dla klientów.</p>
       </header>
 
-      <div class="coming-soon-card">
-        <div class="coming-soon-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-            <line x1="7" y1="7" x2="7.01" y2="7"/>
-          </svg>
-        </div>
-        <h2>Moduł w przygotowaniu</h2>
-        <p>Funkcjonalność kodów rabatowych jest w trakcie tworzenia. Wkrótce będzie dostępna.</p>
+      <div class="card">
+        <h3>Dodaj nowy kod</h3>
+        <form (ngSubmit)="add()">
+          <input type="text" [(ngModel)]="newCode.code" name="code" placeholder="Kod" required>
+          <select [(ngModel)]="newCode.type" name="type">
+            <option value="PERCENTAGE">Procentowy</option>
+            <option value="FIXED">Kwotowy</option>
+          </select>
+          <input type="number" [(ngModel)]="newCode.value" name="value" placeholder="Wartość" required>
+          <button type="submit" class="btn btn-primary">Dodaj</button>
+        </form>
+      </div>
+
+      <div class="card mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Kod</th>
+              <th>Typ</th>
+              <th>Wartość</th>
+              <th>Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of items">
+              <td>{{ item.id }}</td>
+              <td>{{ item.code }}</td>
+              <td>{{ item.type }}</td>
+              <td>{{ item.value }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" (click)="delete(item.id!)">Usuń</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `,
   styles: [`
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      margin-bottom: 16px;
-      transition: color 0.2s ease;
-    }
-    .back-link:hover { color: var(--primary-light); }
-    .back-link svg { width: 18px; height: 18px; }
-
-    .coming-soon-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 40px;
-      background: rgba(255,255,255,0.02);
-      border: 1px dashed rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      margin-top: 20px;
-    }
-    .coming-soon-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 159, 67, 0.1);
-      color: #ff9f43;
-      margin-bottom: 24px;
-    }
-    .coming-soon-icon svg { width: 36px; height: 36px; }
-    .coming-soon-card h2 {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-    .coming-soon-card p {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 400px;
-      line-height: 1.6;
-    }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; text-decoration: none; }
+    .card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .mt-4 { margin-top: 24px; }
+    input, select { padding: 8px; margin-right: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+    option { background-color: #1e1e2d; color: white; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+    .btn-primary { background: var(--primary); }
+    .btn-danger { background: #ff4757; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
   `]
 })
-export class DiscountCodesComponent {}
+export class DiscountCodesComponent implements OnInit {
+  private service = inject(DiscountCodeService);
+  items: DiscountCode[] = [];
+  newCode: DiscountCode = { code: '', type: 'PERCENTAGE', value: 0, active: true };
+
+  ngOnInit() { this.load(); }
+  load() { this.service.getAll().subscribe(d => this.items = d); }
+  add() { this.service.create(this.newCode).subscribe(() => { this.load(); this.newCode = { code: '', type: 'PERCENTAGE', value: 0, active: true }; }); }
+  delete(id: number) { this.service.delete(id).subscribe(() => this.load()); }
+}

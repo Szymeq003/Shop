@@ -7898,3 +7898,5 @@ app-employee-dashboard .dashboard-card:hover .arrow-icon {
     text-align: center;
   }
 }
+
+option { background-color: #1e1e2d !important; color: white !important; }
