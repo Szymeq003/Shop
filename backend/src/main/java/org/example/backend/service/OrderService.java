@@ -51,12 +51,22 @@ public class OrderService {
         Order order = orderRepository.findByIdWithItems(id)
                 .orElseThrow(() -> new RuntimeException("Zamówienie nie znalezione"));
         
+        Order.Status oldStatus = order.getStatus();
         order.setStatus(status);
-        if (status == Order.Status.anulowane) {
+        
+        if (status == Order.Status.anulowane && oldStatus != Order.Status.anulowane) {
             // Restore stock if canceled
             for (OrderItem item : order.getItems()) {
-                productVariantRepository.findById(item.getVariantId()).ifPresent(variant -> {
+                productVariantRepository.findByIdWithLock(item.getVariantId()).ifPresent(variant -> {
                     variant.setStockQuantity(variant.getStockQuantity() + item.getQuantity());
+                    productVariantRepository.save(variant);
+                });
+            }
+        } else if (oldStatus == Order.Status.anulowane && status != Order.Status.anulowane) {
+            // Decrease stock if uncanceled
+            for (OrderItem item : order.getItems()) {
+                productVariantRepository.findByIdWithLock(item.getVariantId()).ifPresent(variant -> {
+                    variant.setStockQuantity(variant.getStockQuantity() - item.getQuantity());
                     productVariantRepository.save(variant);
                 });
             }
@@ -106,7 +116,9 @@ public class OrderService {
                 .build();
 
         for (CartItem cartItem : cart.getItems()) {
-            ProductVariant variant = cartItem.getVariant();
+            ProductVariant variant = productVariantRepository.findByIdWithLock(cartItem.getVariant().getId())
+                    .orElseThrow(() -> new RuntimeException("Wariant nie znaleziony"));
+                    
             if (variant.getStockQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException("Brak wystarczającej ilości produktu: " + variant.getProduct().getName());
             }
@@ -151,7 +163,7 @@ public class OrderService {
         
         // Restore stock
         for (OrderItem item : order.getItems()) {
-            productVariantRepository.findById(item.getVariantId()).ifPresent(variant -> {
+            productVariantRepository.findByIdWithLock(item.getVariantId()).ifPresent(variant -> {
                 variant.setStockQuantity(variant.getStockQuantity() + item.getQuantity());
                 productVariantRepository.save(variant);
             });

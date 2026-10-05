@@ -66,9 +66,12 @@ public class ProductService {
     @Transactional
     public void syncAllProductRatings() {
         productRepository.findAll().forEach(product -> {
-            int count = product.getReviews().size();
+            List<Review> approvedReviews = product.getReviews().stream()
+                .filter(r -> r.getStatus() == Review.Status.APPROVED)
+                .collect(Collectors.toList());
+            int count = approvedReviews.size();
             double average = count > 0 ? 
-                product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0) : 0.0;
+                approvedReviews.stream().mapToInt(Review::getRating).average().orElse(0.0) : 0.0;
             product.setAverageRating(average);
             product.setReviewCount(count);
             productRepository.save(product);
@@ -271,7 +274,9 @@ public class ProductService {
                 .mainImageUrl(imageUrls.isEmpty() ? null : imageUrls.get(0))
                 .imageUrls(imageUrls)
                 .variants(product.getVariants().stream().map(this::convertToVariantDTO).collect(Collectors.toList()))
-                .reviews(product.getReviews().stream().map(this::convertToReviewDTO).collect(Collectors.toList()))
+                .reviews(product.getReviews().stream()
+                        .filter(r -> r.getStatus() == Review.Status.APPROVED)
+                        .map(this::convertToReviewDTO).collect(Collectors.toList()))
                 .attributes(attributesMap)
                 .averageRating(product.getAverageRating())
                 .reviewCount(product.getReviewCount())

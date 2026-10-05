@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,62 +11,157 @@ import { Promotion, PromotionService } from '../../../core/services/promotion.se
   template: `
     <div class="container page">
       <header class="page-header">
-        <a routerLink="/admin/dashboard" class="back-link">Powrót do panelu</a>
+        <a routerLink="/admin/dashboard" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Powrót do panelu
+        </a>
         <h1 class="page-title">Promocje</h1>
+        <p class="page-subtitle">Ustalaj promocje sezonowe, wyprzedaże i oferty specjalne.</p>
       </header>
 
-      <div class="card">
+      <div class="card form-card">
         <h3>Dodaj nową promocję</h3>
-        <form (ngSubmit)="add()">
-          <input type="text" [(ngModel)]="newItem.name" name="name" placeholder="Nazwa" required>
-          <input type="number" [(ngModel)]="newItem.discountPercentage" name="discountPercentage" placeholder="Zniżka %" required>
-          <button type="submit" class="btn btn-primary">Dodaj</button>
+        <form (ngSubmit)="add()" class="inline-form">
+          <input type="text" [(ngModel)]="newItem.name" name="name" placeholder="Nazwa promocji" required>
+          <input type="number" [(ngModel)]="newItem.discountPercentage" name="discountPercentage" placeholder="Zniżka %" required min="0" max="100">
+          <button type="submit" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Dodaj
+          </button>
         </form>
       </div>
 
       <div class="card mt-4">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nazwa</th>
-              <th>Zniżka %</th>
-              <th>Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of items">
-              <td>{{ item.id }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.discountPercentage }}</td>
-              <td>
-                <button class="btn btn-danger btn-sm" (click)="delete(item.id!)">Usuń</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap" *ngIf="!isLoading() && items().length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nazwa</th>
+                <th>Zniżka %</th>
+                <th>Status</th>
+                <th>Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items()">
+                <td><span class="id-cell">#{{ item.id }}</span></td>
+                <td><span class="name-cell">{{ item.name }}</span></td>
+                <td><span class="badge badge-discount">{{ item.discountPercentage }}%</span></td>
+                <td>
+                  <span class="badge" [class.badge-active]="item.active" [class.badge-inactive]="!item.active">
+                    {{ item.active ? 'Aktywna' : 'Nieaktywna' }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-delete" (click)="delete(item.id!)" title="Usuń">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading()">
+          <div class="spinner"></div>
+          <p>Ładowanie promocji...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading() && items().length === 0">
+          <div class="empty-icon">🏷️</div>
+          <p>Brak promocji. Dodaj pierwszą promocję powyżej.</p>
+        </div>
       </div>
     </div>
   `,
   styles: [`
-    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; text-decoration: none; }
-    .card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .back-link { display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:14px;margin-bottom:16px;transition:color .2s ease; }
+    .back-link:hover { color:var(--primary-light); }
+    .back-link svg { width:18px;height:18px; }
+    .form-card { padding: 24px; }
+    .form-card h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+    .inline-form { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .inline-form input, .inline-form select { 
+      padding: 10px 14px; background: var(--surface-3); border: 1px solid var(--border); 
+      color: var(--text); border-radius: var(--radius-sm); font-size: 14px; outline: none; transition: border-color .2s ease; 
+    }
+    .inline-form input:focus { border-color: var(--primary); }
+    .inline-form input[type="text"] { flex: 1; min-width: 200px; }
+    .inline-form input[type="number"] { width: 120px; }
     .mt-4 { margin-top: 24px; }
-    input, select { padding: 8px; margin-right: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
-    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; color: white; }
-    .btn-primary { background: var(--primary); }
-    .btn-danger { background: #ff4757; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .id-cell { color: var(--text-muted); font-size: 13px; }
+    .name-cell { font-weight: 500; color: var(--text); }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-discount { background: rgba(139,92,246,0.12); color: var(--primary-light); }
+    .badge-active { background: rgba(81,207,102,0.12); color: var(--success); }
+    .badge-inactive { background: rgba(255,107,107,0.12); color: var(--error); }
+    .btn-delete {
+      background: rgba(255,107,107,0.05); border: 1px solid rgba(255,107,107,0.2); color: var(--error);
+      cursor: pointer; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all .2s ease;
+    }
+    .btn-delete:hover { background: rgba(255,107,107,0.15); border-color: var(--error); }
+    .btn-delete svg { width: 16px; height: 16px; }
+    .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; color: var(--text-muted); }
+    .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; color: var(--text-muted); }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; border-radius: var(--radius-sm); cursor: pointer; color: white; font-size: 14px; font-weight: 500; }
+    .btn-primary { background: var(--primary); transition: background .2s ease; }
+    .btn-primary:hover { background: var(--primary-light); }
   `]
 })
 export class PromotionsComponent implements OnInit {
   private service = inject(PromotionService);
-  items: Promotion[] = [];
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+  
+  items = signal<Promotion[]>([]);
+  isLoading = signal(true);
   newItem: Promotion = { name: '', discountPercentage: 0, active: true };
 
   ngOnInit() { this.load(); }
-  load() { this.service.getAll().subscribe(d => this.items = d); }
-  add() { this.service.create(this.newItem).subscribe(() => { this.load(); this.newItem = { name: '', discountPercentage: 0, active: true }; }); }
-  delete(id: number) { this.service.delete(id).subscribe(() => this.load()); }
+
+  load() {
+    this.isLoading.set(true);
+    this.service.getAll().subscribe({
+      next: (d) => {
+        this.ngZone.run(() => {
+          this.items.set(d);
+          this.isLoading.set(false);
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        this.ngZone.run(() => {
+          this.isLoading.set(false);
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  add() {
+    this.service.create(this.newItem).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.load();
+          this.newItem = { name: '', discountPercentage: 0, active: true };
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  delete(id: number) {
+    this.service.delete(id).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.items.update(list => list.filter(i => i.id !== id));
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
 }

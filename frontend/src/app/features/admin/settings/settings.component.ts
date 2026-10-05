@@ -1,38 +1,75 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Setting, SettingService } from '../../../core/services/setting.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="container page">
-      <header class="page-header">
-        <a routerLink="/admin/dashboard" class="back-link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          Powrót do panelu
-        </a>
-        <h1 class="page-title">Ustawienia Sklepu</h1>
-        <p class="page-subtitle">Konfiguruj podstawowe parametry i działanie sklepu.</p>
-      </header>
-      <div class="coming-soon-card">
-        <div class="coming-soon-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </div>
-        <h2>Moduł w przygotowaniu</h2>
-        <p>Konfiguracja ustawień sklepu jest w trakcie tworzenia. Wkrótce będzie dostępna.</p>
+      <header class="page-header"><a routerLink="/admin/dashboard" class="back-link">Powrót do panelu</a><h1 class="page-title">Ustawienia Systemowe</h1></header>
+      <div class="card">
+        <form (ngSubmit)="add()">
+          <input type="text" [(ngModel)]="newItem.key" name="key" placeholder="Klucz np. STORE_NAME" required>
+          <input type="text" [(ngModel)]="newItem.value" name="value" placeholder="Wartość" required>
+          <button type="submit" class="btn btn-primary">Dodaj</button>
+        </form>
+      </div>
+      <div class="card mt-4">
+        <table class="table">
+          <thead><tr><th>ID</th><th>Klucz</th><th>Wartość</th><th>Akcje</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let item of items()"><td>{{item.id}}</td><td>{{item.key}}</td><td>{{item.value}}</td><td><button class="btn btn-danger btn-sm" (click)="delete(item.id!)">Usuń</button></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `,
   styles: [`
-    .back-link { display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:14px;margin-bottom:16px;transition:color .2s ease; }
-    .back-link:hover { color:var(--primary-light); }
-    .back-link svg { width:18px;height:18px; }
-    .coming-soon-card { display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:var(--radius);margin-top:20px; }
-    .coming-soon-icon { width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,.1);color:var(--primary-light);margin-bottom:24px; }
-    .coming-soon-icon svg { width:36px;height:36px; }
-    .coming-soon-card h2 { font-size:22px;font-weight:600;color:var(--text);margin-bottom:8px; }
-    .coming-soon-card p { font-size:14px;color:var(--text-muted);max-width:400px;line-height:1.6; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; text-decoration: none; }
+    .card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .mt-4 { margin-top: 24px; }
+    input { padding: 8px; margin-right: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+    .btn-primary { background: var(--primary); }
+    .btn-danger { background: #ff4757; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
   `]
 })
-export class SettingsComponent {}
+export class SettingsComponent implements OnInit {
+  private service = inject(SettingService);
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+  items = signal<Setting[]>([]);
+  newItem: Setting = { key: '', value: '' };
+
+  ngOnInit() { this.load(); }
+
+  load() {
+    this.service.getAll().subscribe({
+      next: (d) => {
+        this.ngZone.run(() => { this.items.set(d); this.cdr.detectChanges(); });
+      }
+    });
+  }
+
+  add() {
+    this.service.create(this.newItem).subscribe({
+      next: () => {
+        this.ngZone.run(() => { this.load(); this.newItem = { key: '', value: '' }; this.cdr.detectChanges(); });
+      }
+    });
+  }
+
+  delete(id: number) {
+    this.service.delete(id).subscribe({
+      next: () => {
+        this.ngZone.run(() => { this.items.update(list => list.filter(i => i.id !== id)); this.cdr.detectChanges(); });
+      }
+    });
+  }
+}

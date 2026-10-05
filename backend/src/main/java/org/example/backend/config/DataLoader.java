@@ -19,6 +19,8 @@ public class DataLoader implements CommandLineRunner {
     private final ProductAttributeRepository productAttributeRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Override
@@ -87,6 +89,114 @@ public class DataLoader implements CommandLineRunner {
         
         Category telewizory = getOrCreateCategory("Telewizory", rtvAgd);
         seedRtvAgd(producent, ekran, moc, rtvAgd, telewizory);
+
+        // --- MASSIVE FAKE DATA LOADER ---
+        seedMassiveFakeProducts(producent, kolor, ram, storage);
+        seedRandomOrders();
+    }
+
+    private void seedRandomOrders() {
+        Random rand = new Random(42);
+        List<User> users = userRepository.findAll();
+        List<ProductVariant> variants = productVariantRepository.findAll();
+        
+        if (users.isEmpty() || variants.isEmpty()) return;
+
+        // Ensure users have addresses
+        List<User> usersWithAddresses = new ArrayList<>();
+        for (User u : users) {
+            if (!u.getAddresses().isEmpty()) {
+                usersWithAddresses.add(u);
+            }
+        }
+        
+        if (usersWithAddresses.isEmpty()) return; // Needs addresses for orders
+        
+        int ordersCount = (int) cartRepository.count() + 100; // Let's add 100 fake orders
+        
+        for (int i = 0; i < 100; i++) {
+            User user = usersWithAddresses.get(rand.nextInt(usersWithAddresses.size()));
+            Address address = user.getAddresses().get(0);
+            
+            Order order = Order.builder()
+                .user(user)
+                .address(address)
+                .status(Order.Status.values()[rand.nextInt(Order.Status.values().length)])
+                .paymentStatus("Opłacone")
+                .paymentMethod("Karta")
+                .shippingMethod("Kurier")
+                .shippingFee(new BigDecimal("15.00"))
+                .items(new ArrayList<>())
+                .build();
+                
+            int numItems = 1 + rand.nextInt(4);
+            BigDecimal total = BigDecimal.ZERO;
+            
+            for (int j = 0; j < numItems; j++) {
+                ProductVariant variant = variants.get(rand.nextInt(variants.size()));
+                int quantity = 1 + rand.nextInt(3);
+                BigDecimal price = variant.getPrice() != null ? variant.getPrice() : variant.getProduct().getPrice();
+                
+                OrderItem item = OrderItem.builder()
+                    .order(order)
+                    .product(variant.getProduct())
+                    .variantId(variant.getId())
+                    .quantity(quantity)
+                    .price(price)
+                    .build();
+                    
+                order.getItems().add(item);
+                total = total.add(price.multiply(BigDecimal.valueOf(quantity)));
+            }
+            
+            order.setTotalPrice(total.add(order.getShippingFee()));
+            orderRepository.save(order);
+        }
+    }
+
+    private void seedMassiveFakeProducts(ProductAttribute producent, ProductAttribute kolor, ProductAttribute ram, ProductAttribute storage) {
+        Random rand = new Random(42); // deterministic
+        List<Category> allCategories = categoryRepository.findAll();
+        if (allCategories.isEmpty()) return;
+
+        List<String> adjectives = List.of("Pro", "Max", "Ultra", "Lite", "Gaming", "Business", "Home", "Smart", "Eco", "Premium");
+        List<String> nouns = List.of("Laptop", "Monitor", "Headphones", "Speaker", "Mouse", "Keyboard", "Router", "Camera", "Tablet", "Console");
+        List<String> brands = List.of("Samsung", "Apple", "Lenovo", "Dell", "HP", "Asus", "Acer", "Sony", "JBL", "Logitech");
+        List<String> colors = List.of("Black", "White", "Silver", "Gray", "Red", "Blue", "Green", "Rose Gold");
+        List<String> rams = List.of("4GB", "8GB", "16GB", "32GB", "64GB");
+        List<String> storages = List.of("128GB", "256GB", "512GB", "1TB", "2TB");
+        
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) return;
+        List<String> reviewComments = List.of("Świetny produkt, polecam!", "Działa jak należy.", "Trochę za drogi, ale jakość super.", "Bateria trzyma krócej niż zakładałem.", "Wykonanie bardzo solidne.", "Jeden z najlepszych zakupów w tym roku.", "Nie polecam, szybko się zepsuł.", "Wszystko zgodnie z opisem.", "Idealny na prezent.", "Sprzęt godny uwagi.");
+
+        // Generate 250 products
+        for (int i = 0; i < 250; i++) {
+            String brand = brands.get(rand.nextInt(brands.size()));
+            String noun = nouns.get(rand.nextInt(nouns.size()));
+            String adj = adjectives.get(rand.nextInt(adjectives.size()));
+            String name = brand + " " + noun + " " + adj + " " + (1000 + rand.nextInt(9000));
+            
+            // Skip if already exists
+            if (productRepository.findByName(name).isPresent()) continue;
+
+            String desc = "Niesamowity " + noun.toLowerCase() + " od " + brand + ", zaprojektowany dla " + adj.toLowerCase() + " użytkowników. Oferuje najwyższą jakość wykonania i doskonałą wydajność.";
+            double price = 100 + rand.nextInt(8900) + 0.99;
+            Category cat = allCategories.get(rand.nextInt(allCategories.size()));
+            
+            Map<ProductAttribute, String> attrs = new HashMap<>();
+            attrs.put(producent, brand);
+            attrs.put(kolor, colors.get(rand.nextInt(colors.size())));
+            
+            if (noun.equals("Laptop") || noun.equals("Tablet")) {
+                attrs.put(ram, rams.get(rand.nextInt(rams.size())));
+                attrs.put(storage, storages.get(rand.nextInt(storages.size())));
+            }
+
+            createProductWithReviews(name, desc, new BigDecimal(price), cat, 
+                List.of("https://images.unsplash.com/photo-1550009158-9effec7682a2?w=800"), 
+                attrs, rand, users, reviewComments);
+        }
     }
 
     private void seedUsers() {
@@ -425,6 +535,72 @@ public class DataLoader implements CommandLineRunner {
                 }
             }
             product.getVariants().add(variant);
+        }
+
+        productRepository.save(product);
+    }
+
+    private void createProductWithReviews(String name, String description, BigDecimal price, Category category,
+            List<String> images, Map<ProductAttribute, String> attributes, Random rand, List<User> users, List<String> reviewComments) {
+        
+        Optional<Product> existingOpt = productRepository.findByName(name);
+        Product product;
+        
+        if (existingOpt.isPresent()) {
+            product = existingOpt.get();
+        } else {
+            product = Product.builder()
+                    .name(name)
+                    .description(description)
+                    .price(price)
+                    .category(category)
+                    .status(Product.Status.AKTYWNY)
+                    .build();
+        }
+
+        if (images != null && product.getImages().isEmpty()) {
+            for (String img : images) {
+                product.getImages().add(ProductImage.builder().product(product).imagePath(img).build());
+            }
+        }
+
+        if (product.getVariants().isEmpty()) {
+            ProductVariant variant = ProductVariant.builder()
+                    .product(product)
+                    .sku(category.getName().substring(0, 3).toUpperCase() + "-" + Math.abs(name.hashCode()))
+                    .stockQuantity(10 + rand.nextInt(50))
+                    .build();
+
+            if (attributes != null) {
+                for (Map.Entry<ProductAttribute, String> entry : attributes.entrySet()) {
+                    ProductAttributeValue value = ProductAttributeValue.builder()
+                            .attribute(entry.getKey())
+                            .value(entry.getValue())
+                            .build();
+                    variant.getAttributeValues().add(value);
+                }
+            }
+            product.getVariants().add(variant);
+        }
+
+        // Add 1 to 5 random reviews
+        if (product.getReviews().isEmpty()) {
+            int numReviews = 1 + rand.nextInt(5);
+            for (int i = 0; i < numReviews; i++) {
+                User reviewUser = users.get(rand.nextInt(users.size()));
+                int rating = 3 + rand.nextInt(3); // 3 to 5 stars
+                String comment = reviewComments.get(rand.nextInt(reviewComments.size()));
+                
+                Review review = Review.builder()
+                    .product(product)
+                    .user(reviewUser)
+                    .rating(rating)
+                    .comment(comment)
+                    .status(Review.Status.APPROVED)
+                    .build();
+                    
+                product.getReviews().add(review);
+            }
         }
 
         productRepository.save(product);

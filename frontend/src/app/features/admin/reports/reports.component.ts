@@ -7,31 +7,37 @@ import { RouterModule } from '@angular/router';
   imports: [RouterModule],
   template: `
     <div class="container page">
-      <header class="page-header">
-        <a routerLink="/admin/dashboard" class="back-link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          Powrót do panelu
-        </a>
-        <h1 class="page-title">Raporty i Analityka</h1>
-        <p class="page-subtitle">Statystyki sprzedaży, raporty finansowe i analiza zachowań użytkowników.</p>
-      </header>
-      <div class="coming-soon-card">
-        <div class="coming-soon-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <header class="page-header"><a routerLink="/admin/dashboard" class="back-link">Powrót do panelu</a><h1 class="page-title">Raporty (Wersja Poglądowa)</h1></header>
+      <div class="card" style="margin-bottom: 24px;">
+        <h3>Sprzedaż z ostatnich 7 dni</h3>
+        <div style="height: 200px; display: flex; align-items: flex-end; gap: 20px; padding-top: 20px;">
+          <div style="background: var(--primary); width: 40px; height: 30%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 50%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 80%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 60%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 90%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 100%; border-radius: 4px 4px 0 0;"></div>
+          <div style="background: var(--primary); width: 40px; height: 75%; border-radius: 4px 4px 0 0;"></div>
         </div>
-        <h2>Moduł w przygotowaniu</h2>
-        <p>Zaawansowane raporty i analityka są w trakcie tworzenia. Wkrótce będą dostępne.</p>
+      </div>
+      <div class="card">
+        <h3>Najlepiej sprzedające się produkty</h3>
+        <table class="table">
+          <thead><tr><th>Produkt</th><th>Sprzedano</th></tr></thead>
+          <tbody>
+            <tr><td>iPhone 15 Pro</td><td>45 szt.</td></tr>
+            <tr><td>MacBook Air M2</td><td>23 szt.</td></tr>
+            <tr><td>Logitech G Pro X</td><td>12 szt.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `,
   styles: [`
-    .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:14px;margin-bottom:16px;transition:color .2s ease}
-    .back-link:hover{color:var(--primary-light)}.back-link svg{width:18px;height:18px}
-    .coming-soon-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:var(--radius);margin-top:20px}
-    .coming-soon-icon{width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,.1);color:var(--primary-light);margin-bottom:24px}
-    .coming-soon-icon svg{width:36px;height:36px}
-    .coming-soon-card h2{font-size:22px;font-weight:600;color:var(--text);margin-bottom:8px}
-    .coming-soon-card p{font-size:14px;color:var(--text-muted);max-width:400px;line-height:1.6}
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; text-decoration: none; }
+    .card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
   `]
 })
 export class ReportsComponent {}

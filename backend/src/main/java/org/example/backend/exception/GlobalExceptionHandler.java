@@ -43,13 +43,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        try {
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            Files.write(Paths.get("last_error.log"), sw.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (Exception ignored) {}
-        
-        ex.printStackTrace(); // Log the exact exception causing the 400 Bad Request
+        if (ex.getClass() != RuntimeException.class && ex.getClass() != IllegalArgumentException.class) {
+            // It's a system runtime exception (like JpaSystemException)
+            return handleGlobalException(ex);
+        }
+
+        // It's a business logic validation exception
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", ex.getMessage());
@@ -78,6 +77,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex) {
+        try {
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            Files.write(Paths.get("last_error.log"), sw.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception ignored) {}
+        
+        ex.printStackTrace(); // Keep console log
+
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", "Wystąpił nieoczekiwany błąd serwera");
