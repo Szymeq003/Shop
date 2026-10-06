@@ -23,6 +23,80 @@ public class DataLoader implements CommandLineRunner {
     private final ProductVariantRepository productVariantRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    private static final List<String> LAPTOP_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+            "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800",
+            "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800",
+            "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800",
+            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800"
+    );
+    private static final List<String> LAPTOP_GAMING_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800",
+            "https://images.unsplash.com/photo-1580522151917-c205f257bf8c?w=800",
+            "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800"
+    );
+    private static final List<String> MONITOR_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800",
+            "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=800",
+            "https://images.unsplash.com/photo-1551645120-d70bfe84c826?w=800",
+            "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=800",
+            "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800"
+    );
+    private static final List<String> HEADPHONES_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+            "https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?w=800",
+            "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800",
+            "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800",
+            "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800"
+    );
+    private static final List<String> SPEAKER_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1589003077984-894e133dabab?w=800",
+            "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800",
+            "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800",
+            "https://images.unsplash.com/photo-1543512214-318c7553f230?w=800",
+            "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800",
+            "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800"
+    );
+    private static final List<String> MOUSE_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800",
+            "https://images.unsplash.com/photo-1605773527852-c546a8584ea3?w=800",
+            "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800",
+            "https://images.unsplash.com/photo-1629429408209-1f912961dbd8?w=800",
+            "https://images.unsplash.com/photo-1613141411244-0e4ac259d217?w=800",
+            "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800"
+    );
+    private static final List<String> KEYBOARD_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800",
+            "https://images.unsplash.com/photo-1595225476474-87563907a212?w=800",
+            "https://images.unsplash.com/photo-1601445638532-3c6f6c3aa1d6?w=800",
+            "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
+            "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=800"
+    );
+    private static final List<String> TABLET_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800",
+            "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=800",
+            "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?w=800",
+            "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800"
+    );
+    private static final List<String> CONSOLE_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=800",
+            "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800",
+            "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?w=800",
+            "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=800"
+    );
+    private static final List<String> CAMERA_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800",
+            "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800",
+            "https://images.unsplash.com/photo-1512790182412-b19e6d62bc39?w=800",
+            "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800"
+    );
+    private static final List<String> ROUTER_IMAGES = List.of(
+            "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800",
+            "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800",
+            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
+            "https://images.unsplash.com/photo-1563770660941-20978e870e26?w=800"
+    );
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -42,21 +116,26 @@ public class DataLoader implements CommandLineRunner {
         Category procesory = getOrCreateCategory("Procesory", podzespoly);
 
         // Subcategories
-        getOrCreateCategory("Słuchawki", audio);
-        getOrCreateCategory("Głośniki", audio);
-        getOrCreateCategory("Kino domowe", audio);
+        Category sluchawki = getOrCreateCategory("Słuchawki", audio);
+        Category glosniki = getOrCreateCategory("Głośniki", audio);
+        Category kinoDomowe = getOrCreateCategory("Kino domowe", audio);
 
-        getOrCreateCategory("Myszki i klawiatury", gamingAcc);
-        getOrCreateCategory("Fotele gamingowe", gamingAcc);
-        getOrCreateCategory("Podkładki i akcesoria", gamingAcc);
+        Category myszkiKlawiatury = getOrCreateCategory("Myszki i klawiatury", gamingAcc);
+        Category foteleGamingowe = getOrCreateCategory("Fotele gamingowe", gamingAcc);
+        Category podkladkiAkcesoria = getOrCreateCategory("Podkładki i akcesoria", gamingAcc);
+        Category konsole = getOrCreateCategory("Konsole do gier", gamingAcc);
 
-        getOrCreateCategory("Monitory", homeOffice);
-        getOrCreateCategory("Biurka i krzesła", homeOffice);
-        getOrCreateCategory("Oprogramowanie", homeOffice);
+        Category monitory = getOrCreateCategory("Monitory", homeOffice);
+        Category biurkaKrzesla = getOrCreateCategory("Biurka i krzesła", homeOffice);
+        Category oprogramowanie = getOrCreateCategory("Oprogramowanie", homeOffice);
+        Category sieci = getOrCreateCategory("Urządzenia sieciowe", homeOffice);
+        Category kamery = getOrCreateCategory("Kamery i aparaty", homeOffice);
 
-        getOrCreateCategory("Telewizory", rtvAgd);
-        getOrCreateCategory("Ekspresy do kawy", rtvAgd);
-        getOrCreateCategory("Małe AGD", rtvAgd);
+        Category telewizory = getOrCreateCategory("Telewizory", rtvAgd);
+        Category ekspresy = getOrCreateCategory("Ekspresy do kawy", rtvAgd);
+        Category maleAgd = getOrCreateCategory("Małe AGD", rtvAgd);
+
+        Category tablety = getOrCreateCategory("Tablety", smartfony);
 
         // --- Attributes ---
         ProductAttribute producent = getOrCreateAttribute("Producent");
@@ -74,24 +153,15 @@ public class DataLoader implements CommandLineRunner {
         // Seeding each category (createProduct will handle existence check)
         seedLaptops(producent, cpu, ram, gpu, ekran, laptopy, laptopyGamingowe);
         seedSmartphones(producent, cpu, ram, storage, ekran, bateria, smartfony);
-        
-        Category sluchawki = getOrCreateCategory("Słuchawki", audio);
-        Category glosniki = getOrCreateCategory("Głośniki", audio);
         seedAudio(producent, kolor, moc, bateria, cpu, sluchawki, glosniki);
-        
-        Category myszkiKlawiatury = getOrCreateCategory("Myszki i klawiatury", gamingAcc);
         seedGaming(producent, kolor, storage, myszkiKlawiatury);
-        
-        Category monitory = getOrCreateCategory("Monitory", homeOffice);
         seedHomeOffice(producent, ekran, odswiezanie, monitory);
-        
         seedComponents(producent, cpu, ram, gpu, storage, podzespoly, kartyGraficzne, procesory);
-        
-        Category telewizory = getOrCreateCategory("Telewizory", rtvAgd);
-        seedRtvAgd(producent, ekran, moc, rtvAgd, telewizory);
+        seedRtvAgd(producent, ekran, moc, telewizory, ekspresy);
 
         // --- MASSIVE FAKE DATA LOADER ---
-        seedMassiveFakeProducts(producent, kolor, ram, storage);
+        seedMassiveFakeProducts(producent, kolor, ram, storage,
+                laptopy, laptopyGamingowe, monitory, sluchawki, glosniki, myszkiKlawiatury, tablety, konsole, sieci, kamery);
         seedRandomOrders();
     }
 
@@ -154,10 +224,10 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    private void seedMassiveFakeProducts(ProductAttribute producent, ProductAttribute kolor, ProductAttribute ram, ProductAttribute storage) {
+    private void seedMassiveFakeProducts(ProductAttribute producent, ProductAttribute kolor, ProductAttribute ram, ProductAttribute storage,
+            Category laptopy, Category laptopyGamingowe, Category monitory, Category sluchawki, Category glosniki,
+            Category myszkiKlawiatury, Category tablety, Category konsole, Category sieci, Category kamery) {
         Random rand = new Random(42); // deterministic
-        List<Category> allCategories = categoryRepository.findAll();
-        if (allCategories.isEmpty()) return;
 
         List<String> adjectives = List.of("Pro", "Max", "Ultra", "Lite", "Gaming", "Business", "Home", "Smart", "Eco", "Premium");
         List<String> nouns = List.of("Laptop", "Monitor", "Headphones", "Speaker", "Mouse", "Keyboard", "Router", "Camera", "Tablet", "Console");
@@ -176,13 +246,60 @@ public class DataLoader implements CommandLineRunner {
             String noun = nouns.get(rand.nextInt(nouns.size()));
             String adj = adjectives.get(rand.nextInt(adjectives.size()));
             String name = brand + " " + noun + " " + adj + " " + (1000 + rand.nextInt(9000));
-            
-            // Skip if already exists
-            if (productRepository.findByName(name).isPresent()) continue;
+
+            Category cat;
+            List<String> pool;
+            switch (noun) {
+                case "Laptop":
+                    if ("Gaming".equals(adj)) {
+                        cat = laptopyGamingowe;
+                        pool = LAPTOP_GAMING_IMAGES;
+                    } else {
+                        cat = laptopy;
+                        pool = LAPTOP_IMAGES;
+                    }
+                    break;
+                case "Monitor":
+                    cat = monitory;
+                    pool = MONITOR_IMAGES;
+                    break;
+                case "Headphones":
+                    cat = sluchawki;
+                    pool = HEADPHONES_IMAGES;
+                    break;
+                case "Speaker":
+                    cat = glosniki;
+                    pool = SPEAKER_IMAGES;
+                    break;
+                case "Mouse":
+                case "Keyboard":
+                    cat = myszkiKlawiatury;
+                    pool = noun.equals("Mouse") ? MOUSE_IMAGES : KEYBOARD_IMAGES;
+                    break;
+                case "Tablet":
+                    cat = tablety;
+                    pool = TABLET_IMAGES;
+                    break;
+                case "Console":
+                    cat = konsole;
+                    pool = CONSOLE_IMAGES;
+                    break;
+                case "Camera":
+                    cat = kamery;
+                    pool = CAMERA_IMAGES;
+                    break;
+                case "Router":
+                    cat = sieci;
+                    pool = ROUTER_IMAGES;
+                    break;
+                default:
+                    cat = laptopy;
+                    pool = LAPTOP_IMAGES;
+                    break;
+            }
 
             String desc = "Niesamowity " + noun.toLowerCase() + " od " + brand + ", zaprojektowany dla " + adj.toLowerCase() + " użytkowników. Oferuje najwyższą jakość wykonania i doskonałą wydajność.";
             double price = 100 + rand.nextInt(8900) + 0.99;
-            Category cat = allCategories.get(rand.nextInt(allCategories.size()));
             
             Map<ProductAttribute, String> attrs = new HashMap<>();
             attrs.put(producent, brand);
@@ -193,8 +310,12 @@ public class DataLoader implements CommandLineRunner {
                 attrs.put(storage, storages.get(rand.nextInt(storages.size())));
             }
 
+            int imgIdx1 = (name.hashCode() & 0x7fffffff) % pool.size();
+            int imgIdx2 = (imgIdx1 + 1) % pool.size();
+            List<String> productImgs = pool.size() > 1 ? List.of(pool.get(imgIdx1), pool.get(imgIdx2)) : List.of(pool.get(imgIdx1));
+
             createProductWithReviews(name, desc, new BigDecimal(price), cat, 
-                List.of("https://images.unsplash.com/photo-1550009158-9effec7682a2?w=800"), 
+                productImgs, 
                 attrs, rand, users, reviewComments);
         }
     }
@@ -445,14 +566,15 @@ public class DataLoader implements CommandLineRunner {
                         getOrCreateAttribute("Socket"), "LGA1700"));
     }
 
-    private void seedRtvAgd(ProductAttribute producent, ProductAttribute ekran, ProductAttribute moc, Category rtvAgd,
-            Category telewizory) {
+    private void seedRtvAgd(ProductAttribute producent, ProductAttribute ekran, ProductAttribute moc, Category telewizory,
+            Category ekspresy) {
         createP("Samsung OLED S95C 65",
                 "Przeżyj niesamowite wrażenia wizualne z najnowszym telewizorem OLED firmy Samsung. Dzięki technologii Quantum HDR OLED+, obraz jest niezwykle jasny, a kolory nasycone i realistyczne jak nigdy dotąd. \n\n"
                         +
                         "Procesor AI Quantum 4K optymalizuje każdą scenę przy użyciu sztucznej inteligencji, zapewniając płynność ruchu i głęboką czerń. Ultra-smukły design Infinity One sprawia, że telewizor wygląda jak dzieło sztuki, a system dźwięku Dolby Atmos 4.2.2 CH przenosi Cię w samo centrum akcji.",
                 11999, telewizory,
-                List.of("https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800"),
+                List.of("https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800",
+                        "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=800"),
                 Map.of(producent, "Samsung", ekran, "65 QD-OLED 4K 144Hz", getOrCreateAttribute("System Smart"),
                         "Tizen OS", getOrCreateAttribute("HDR"), "HDR10+, HLG"));
 
@@ -460,8 +582,9 @@ public class DataLoader implements CommandLineRunner {
                 "Dinamica Plus to w pełni automatyczny ekspres do kawy, który łączy w sobie elegancję, wydajność i nowoczesną technologię. Dzięki systemowi LatteCrema, ekspres przygotowuje gęstą i kremową piankę mleczną o idealnej temperaturze za jednym dotknięciem. \n\n"
                         +
                         "Kolorowy wyświetlacz dotykowy TFT ułatwia personalizację ulubionych napojów, a funkcja 'My' pozwala dostosować aromat oraz ilość kawy i mleka do własnych preferencji. Ekspres oferuje szeroki wybór przepisów – od klasycznego Espresso po modne Flat White.",
-                3499, rtvAgd,
-                List.of("https://images.unsplash.com/photo-1580915411954-282cb1b0d780?w=800"),
+                3499, ekspresy,
+                List.of("https://images.unsplash.com/photo-1580915411954-282cb1b0d780?w=800",
+                        "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800"),
                 Map.of(producent, "DeLonghi", moc, "1450W", getOrCreateAttribute("Ciśnienie"), "19 bar",
                         getOrCreateAttribute("Młynek"), "Stalowy żarnowy"));
     }
@@ -548,6 +671,16 @@ public class DataLoader implements CommandLineRunner {
         
         if (existingOpt.isPresent()) {
             product = existingOpt.get();
+            product.setCategory(category);
+            boolean hasPlaceholder = product.getImages().stream().anyMatch(i -> i.getImagePath().contains("photo-1550009158"));
+            if (hasPlaceholder || product.getImages().isEmpty()) {
+                product.getImages().clear();
+                if (images != null) {
+                    for (String img : images) {
+                        product.getImages().add(ProductImage.builder().product(product).imagePath(img).build());
+                    }
+                }
+            }
         } else {
             product = Product.builder()
                     .name(name)

@@ -28,7 +28,7 @@ import { ProductCardComponent } from '../products/product-card/product-card.comp
             </p>
             <div class="hero-btns animate-slide-up-further">
               <a routerLink="/products" class="btn btn-primary-glow btn-xl">Eksploruj sprzęt</a>
-              <a routerLink="/products" [queryParams]="{categoryId: 4}" class="btn btn-glass btn-xl">Gaming Zone</a>
+              <a routerLink="/products" [queryParams]="{categoryId: 5}" class="btn btn-glass btn-xl">Gaming Zone</a>
             </div>
           </div>
           <div class="hero-visual animate-float">
@@ -93,7 +93,7 @@ import { ProductCardComponent } from '../products/product-card/product-card.comp
               <img src="assets/images/hardware.png" class="bento-img">
           </div>
 
-          <div class="bento-item bento-sq audio-box" routerLink="/products" [queryParams]="{categoryId: 23}">
+          <div class="bento-item bento-sq audio-box" routerLink="/products" [queryParams]="{categoryId: 4}">
               <div class="bento-info">
                 <h3>Audio i Hi-Fi</h3>
               </div>
